@@ -1,0 +1,18 @@
+{
+    "Setting": true,
+    "Branch": true,
+    "Employee": true,
+    "User": true,
+    "Team": true,
+    "Faq": true,
+    "Service": true,
+    "Testimonial": true,
+    "Blog": true,
+    "Slider": true,
+    "Vacancy": true,
+    "Expenses": true,
+    "Inventory": true,
+    "PettyCash": true,
+    "Finance": true,
+    "Product": true
+}
