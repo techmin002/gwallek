@@ -357,7 +357,7 @@
                               <li class="nav-item">
                                   <a href="{{ route('teams.index') }}"
                                       class="nav-link {{ request()->routeIs('teams.index') ? 'active' : '' }}">
-                                      <i class="far fa-circle nav-icon"></i>
+                                      <i class="nav-icon fas fa-users"></i>
                                       <p>Teams</p>
                                   </a>
                               </li>
