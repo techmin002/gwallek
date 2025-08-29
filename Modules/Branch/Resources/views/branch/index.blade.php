@@ -1,10 +1,10 @@
 @extends('setting::layouts.master')
 
-@section('title', 'Branches')
+@section('title', 'Office')
 @section('breadcrumb')
     <ol class="breadcrumb border-0 m-0">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-        <li class="breadcrumb-item active">Branches</li>
+        <li class="breadcrumb-item active">Office</li>
     </ol>
 @endsection
 
@@ -15,12 +15,12 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>Branches</h1>
+                        <h1>Office</h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item active">Branches</li>
+                            <li class="breadcrumb-item active">Office</li>
                         </ol>
                     </div>
                 </div>
@@ -67,9 +67,9 @@
                                                 <td class="text-center">{{ $branch->address }}</td>
                                                 <td class="text-center">{{ $branch->status }}</td>
                                                 <td>
-
-                                                        @include('branch::branch.edit')
-                                                    <a href="{{ route('branches.show',$branch->id) }}" class="btn btn-success btn-sm"><i class="fa fa-eye"></i></a>
+                                                    @include('branch::branch.edit')
+                                                    <a href="{{ route('branches.show', $branch->id) }}"
+                                                        class="btn btn-success btn-sm"><i class="fa fa-eye"></i></a>
                                                     <button id="delete" class="btn btn-danger btn-sm"
                                                         onclick="event.preventDefault();if (confirm('Are you sure? It will delete the data permanently!')) {document.getElementById('destroy{{ $branch->id }}').submit()}">
                                                         <i class="fa fa-trash"></i>

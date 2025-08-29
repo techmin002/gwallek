@@ -183,56 +183,59 @@
                       </li>
                   @endcan
                   {{-- Product Mgnt --}}
-                  {{-- @can('access_product')
-                      <li class="nav-item @if (request()->routeIs('products.*')) menu-is-opening menu-open @endif">
-                          <a href="#" class="nav-link @if (request()->routeIs('products.*')) active @endif">
-                              <i class="nav-icon fas fa-image"></i>
-                              <p>
-                                  Product Mgnt
-                                  <i class="right fas fa-angle-left"></i>
-                              </p>
-                          </a>
-                          <ul class="nav nav-treeview">
-                              <li class="nav-item">
-                                  <a href="{{ route('products-categories.index') }}"
-                                      class="nav-link @if (request()->routeIs('products-categories.index')) active @endif">
-                                      <p>Categories</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('products-brands.index') }}"
-                                      class="nav-link @if (request()->routeIs('products-brands.index')) active @endif">
-                                      <p>Brands</p>
-                                  </a>
-                              </li>
-                               <li class="nav-item">
-                                  <a href="{{ route('products-units.index') }}"
-                                      class="nav-link @if (request()->routeIs('products-units.index')) active @endif">
-                                      <p>Units</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('products.index') }}"
-                                      class="nav-link @if (request()->routeIs('products.index')) active @endif">
-                                      <p>Products</p>
-                                  </a>
-                              </li>
+                  @can('access_product')
+                      @can('access_product')
+                          <li
+                              class="nav-item {{ request()->routeIs('units.*') || request()->routeIs('brands.*') || request()->routeIs('categories.*') || request()->routeIs('products.*') ? 'menu-is-opening menu-open' : '' }}">
+                              <a href="#"
+                                  class="nav-link {{ request()->routeIs('units.*') || request()->routeIs('brands.*') || request()->routeIs('categories.*') || request()->routeIs('products.*') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-boxes"></i>
+                                  <p>
+                                      Product Mgnt
+                                      <i class="right fas fa-angle-left"></i>
+                                  </p>
+                              </a>
 
-                              <li class="nav-item">
-                                  <a href="{{ route('products-accessories.index') }}"
-                                      class="nav-link @if (request()->routeIs('products-accessories.index')) active @endif">
-                                      <p>Accessories</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('technicaltools.index') }}"
-                                      class="nav-link {{ request()->routeIs('technicaltools.index') ? 'active' : '' }}">
-                                      <p>Technical Tools</p>
-                                  </a>
-                              </li>
-                          </ul>
-                      </li>
-                  @endcan --}}
+                              <ul class="nav nav-treeview">
+                                  {{-- Units --}}
+                                  <li class="nav-item">
+                                      <a href="{{ route('units.index') }}"
+                                          class="nav-link {{ request()->routeIs('units.*') ? 'active' : '' }}">
+                                          <i class="nav-icon fas fa-balance-scale"></i>
+                                          <p>Units</p>
+                                      </a>
+                                  </li>
+
+                                  {{-- Brands --}}
+                                  <li class="nav-item">
+                                      <a href="{{ route('brands.index') }}"
+                                          class="nav-link {{ request()->routeIs('brands.*') ? 'active' : '' }}">
+                                          <i class="nav-icon fas fa-trademark"></i>
+                                          <p>Brands</p>
+                                      </a>
+                                  </li>
+
+                                  {{-- Categories --}}
+                                  <li class="nav-item">
+                                      <a href="{{ route('categories.index') }}"
+                                          class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                                          <i class="nav-icon fas fa-layer-group"></i>
+                                          <p>Categories</p>
+                                      </a>
+                                  </li>
+
+                                  {{-- Products --}}
+                                  <li class="nav-item">
+                                      <a href="{{ route('products.index') }}"
+                                          class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                                          <i class="nav-icon fas fa-box"></i>
+                                          <p>Products</p>
+                                      </a>
+                                  </li>
+                              </ul>
+                          </li>
+                      @endcan
+                  @endcan
 
                   {{-- Inventory --}}
                   <li
@@ -314,7 +317,7 @@
                           </ul>
                       </li>
                   @endcan
-                   {{-- Leaves --}}
+                  {{-- Leaves --}}
                   @can('access_leaves')
                       <li class="nav-item {{ request()->routeIs('leave.*') ? 'menu-is-opening menu-open' : '' }}">
                           <a href="#" class="nav-link" {{ request()->routeIs('leave.*') ? 'active' : '' }}>
@@ -408,6 +411,45 @@
                   @endcan
                   {{-- Inquiries --}}
 
+                  <li
+                      class="nav-item {{ request()->routeIs('customers.*') || request()->routeIs('managers.*') || request()->routeIs('sites.*') ? 'menu-is-opening menu-open' : '' }}">
+                      <a href="#"
+                          class="nav-link {{ request()->routeIs('customers.*') || request()->routeIs('managers.*') || request()->routeIs('sites.*') ? 'active' : '' }}">
+                          <i class="nav-icon fas fa-project-diagram"></i>
+                          <p>
+                              Project Manager
+                              <i class="right fas fa-angle-left"></i>
+                          </p>
+                      </a>
+                      <ul class="nav nav-treeview">
+                          {{-- Customer --}}
+                          <li class="nav-item">
+                              <a href="{{ route('customers.index') }}"
+                                  class="nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-users"></i>
+                                  <p>Customer</p>
+                              </a>
+                          </li>
+
+                          {{-- Manager  --}}
+                          <li class="nav-item">
+                              <a href="{{ route('managers.index') }}"
+                                  class="nav-link {{ request()->routeIs('managers.*') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-user-tie"></i>
+                                  <p>Manager</p>
+                              </a>
+                          </li>
+
+                          {{-- Site --}}
+                          <li class="nav-item">
+                              <a href="{{ route('sites.index') }}"
+                                  class="nav-link {{ request()->routeIs('sites.*') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-project-diagram"></i>
+                                  <p>Site</p>
+                              </a>
+                          </li>
+                      </ul>
+                  </li>
 
                   @can('access_settings')
                       <li class="nav-item {{ request()->routeIs('company.*') ? 'menu-is-opening menu-open' : '' }}">
@@ -438,6 +480,7 @@
                           </ul>
                       </li>
                   @endcan
+
 
               </ul>
           </nav>

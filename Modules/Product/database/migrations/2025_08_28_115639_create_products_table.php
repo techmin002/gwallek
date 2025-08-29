@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('brand_id');
             $table->string('branch_id')->nullable();
             $table->string('category_id');
-            $table->string('units')->nullable();
+            $table->string('unit_id')->nullable();
             $table->longText('description')->nullable();
             $table->string('image')->nullable();
             $table->text('images')->nullable();

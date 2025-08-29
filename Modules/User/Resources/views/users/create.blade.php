@@ -41,7 +41,6 @@
                                         </div>
                                     </div>
                                     <div class="form-row">
-
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label>Password</label>
@@ -77,24 +76,63 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="role">Role <span class="text-danger">*</span></label>
-                                        <select class="form-control" name="role" id="role" required>
-                                            <option value="" selected disabled>Select Role</option>
-                                            @foreach (\Spatie\Permission\Models\Role::where('name', '!=', 'Super Admin')->get() as $role)
-                                                <option value="{{ $role->name }}">{{ $role->name }}</option>
-                                            @endforeach
-                                        </select>
+                                    <div class="form-row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label for="role">Role <span class="text-danger">*</span></label>
+                                                <select class="form-control" name="role" id="role" required>
+                                                    <option value="" selected disabled>Select Role</option>
+                                                    @foreach (\Spatie\Permission\Models\Role::where('name', '!=', 'Super Admin')->get() as $role)
+                                                        <option value="{{ $role->name }}">{{ $role->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label for="status">Status <span class="text-danger">*</span></label>
+                                                <select class="form-control" name="status" id="status" required>
+                                                    <option value="" selected disabled>Select Status</option>
+                                                    <option value="on">Active</option>
+                                                    <option value="off">Deactive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-lg-6">
+                                            <label class="form-label12" for="phone">Contact Number <span
+                                                    class="text-danger">*</span></label>
+                                            <input class="form-control" placeholder="Enter Title" type="text"
+                                                minlength="10" maxlength="10" name="phone" id="phone" required>
+                                            <div class="invalid-feedback">
+                                                Please Enter Branch Contact Number first!
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <label class="form-label12" for="address">Address <span
+                                                    class="text-danger">*</span></label>
+                                            <input class="form-control" placeholder="Enter address" type="text"
+                                                name="address" id="address" required>
+                                            <div class="invalid-feedback">
+                                                Please Enter Branch Address first!
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label for="branch_id">Select Branch</label>
+                                                <select name="branch_id" id="branch_id" class="form-control" required>
+                                                    <option value="">-- Select Branch --</option>
+                                                    @foreach ($branches as $branch)
+                                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="status">Status <span class="text-danger">*</span></label>
-                                        <select class="form-control" name="status" id="status" required>
-                                            <option value="" selected disabled>Select Status</option>
-                                            <option value="on">Active</option>
-                                            <option value="off">Deactive</option>
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
                         </div>

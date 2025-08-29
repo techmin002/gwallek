@@ -52,8 +52,10 @@
 <!-- Custom Scripts -->
 <script>
     $(document).ready(function() {
-            $('.summernote').summernote();
-        });
+        $('.summernote').summernote();
+    });
+
+
     $(function() {
         // Initialize Select2 Elements
         $('.select2').select2();
@@ -251,4 +253,21 @@
     }
 </script> --}}
 
+<script>
+    $(document).ready(function() {
+        $('#summernote').summernote({
+            height: 150
+        });
 
+        // Ensure Summernote content is passed on form submit
+        $('form').on('submit', function() {
+            // copy the HTML content from summernote to the textarea
+            $('#summernote').val($('#summernote').summernote('code'));
+        });
+
+        // Initialize bootstrap switch if using
+        $("input[data-bootstrap-switch]").each(function() {
+            $(this).bootstrapSwitch('state', $(this).prop('checked'));
+        });
+    });
+</script>

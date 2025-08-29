@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Branch\Entities\Branch;
+use Modules\ProjectManager\Models\Site;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -29,6 +31,8 @@ class User extends Authenticatable
         'status',
         'restaurent_id',
         'access_type',
+        'phone',
+        'address',
         'user_type',
         'created_by',
     ];
@@ -58,5 +62,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function assignedSites()
+    {
+        return $this->hasMany(Site::class, 'assign_to');
+    }
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 }

@@ -16,8 +16,8 @@
                             <div class="col-md-12">
                                 <h5>Branch Detail's</h5>
                             </div>
-                            
-                            
+
+
                         </div>
                         <div class="row mt-2">
                             <div class="col-lg-6" data-select2-id="select2-data-5-a5wr">
@@ -56,7 +56,7 @@
                                     name="email" id="email">
                             </div>
                         </div>
-                        
+
                         <div class="row mt-2 bg-secondary">
                             <div class="col-md-12">
                                 <h5>Admin Detail's</h5>
@@ -107,7 +107,7 @@
                                             Please Enter Password first!
                                           </div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -126,7 +126,7 @@
                                             Please Enter Confirm Password first!
                                           </div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>

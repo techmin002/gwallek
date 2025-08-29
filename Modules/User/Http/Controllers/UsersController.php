@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Modules\Branch\Entities\Branch;
+use Modules\Employee\Entities\Employee;
 use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
@@ -14,7 +16,7 @@ class UsersController extends Controller
     public function index()
     {
         abort_if(Gate::denies('access_user_management'), 403);
-            $users = User::latest()->get();
+        $users = User::latest()->get();
 
         return view('user::users.index', compact("users"));
     }
@@ -23,7 +25,8 @@ class UsersController extends Controller
     public function create()
     {
         abort_if(Gate::denies('access_user_management'), 403);
-        return view('user::users.create');
+        $branches = Branch::all();
+        return view('user::users.create', compact('branches'));
     }
 
 
@@ -33,32 +36,48 @@ class UsersController extends Controller
         abort_if(Gate::denies('access_user_management'), 403);
 
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|max:255|confirmed',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|max:255|unique:users,email',
+            'phone'     => 'nullable|string|max:20',
+            'address'   => 'nullable|string|max:255',
+            'password'  => 'required|string|min:8|max:255|confirmed',
             'branch_id' => 'required'
         ]);
 
         $imageName = '';
         if ($request->image) {
             $imageName = time() . '.' . $request->image->extension();
-
             $request->image->move(public_path('upload/images/users'), $imageName);
         }
+
         $role = Role::where('name', $request->role)->first();
+
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'access_type'    => $request->role,
-            'password' => Hash::make($request->password),
-            'image'    => $imageName,
-            'role_id'    => $role->id,
-            'status' => $request->status
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'branch_id'   => $request->branch_id,
+            'access_type' => $request->role,
+            'password'    => Hash::make($request->password),
+            'image'       => $imageName,
+            'role_id'     => $role->id,
+            'status'      => $request->status
         ]);
 
         $user->assignRole($request->role);
+        $employee = new Employee();
+        $employee->name = $request->name;
+        $employee->email = $request->email;
+        $employee->phone = $request->phone;
+        $employee->address = $request->address;
+        $employee->role = $role->name;
+        $employee->created_by = auth()->id();
+        $employee->user_id = $user->id;
+        $employee->status = $request->status ?? 'on';
+        $employee->save();
+
         return redirect()->route('users.index')->with('success', 'Created Successfully');
     }
+
 
 
     public function edit(User $user)
@@ -76,37 +95,46 @@ class UsersController extends Controller
             $request->validate([
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+                'phone'    => 'nullable|string|max:20',
+                'address'  => 'nullable|string|max:255',
                 'password' => 'string|min:8|max:255|confirmed'
             ]);
         } else {
             $request->validate([
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+                'phone'    => 'nullable|string|max:20',
+                'address'  => 'nullable|string|max:255',
             ]);
         }
 
         $imageName = '';
         if ($request->image) {
             $imageName = time() . '.' . $request->image->extension();
-
             $request->image->move(public_path('upload/images/users'), $imageName);
         } else {
             $imageName = $user->image;
         }
+
         $role_id = Role::where('name', $request->role)->first();
+
         $user->update([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'image' => $imageName,
-            'role_id' => $role_id->id,
-            'status' => $request->status
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'phone'       => $request->phone,
+            'address'     => $request->address,
+            'password'    => $request->password ? Hash::make($request->password) : $user->password,
+            'image'       => $imageName,
+            'role_id'     => $role_id->id,
+            'access_type' => $role_id->name,
+            'status'      => $request->status,
         ]);
 
         $user->syncRoles($request->role);
 
         return redirect()->route('users.index')->with('success', 'Updated Successfully');
     }
+
 
 
     public function destroy(User $user)
