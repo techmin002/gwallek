@@ -33,6 +33,7 @@
                                         <tr>
                                             <th>S.N</th>
                                             <th>Name</th>
+                                            <th class="text-center">Designation</th>
                                             <th class="text-center">Image</th>
                                             <th>Message</th>
                                             <th class="text-center">Status</th>
@@ -44,6 +45,7 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $value->name }}</td>
+                                                <td>{{ $value->designation }}</td>
                                                 <td class="text-center"><img
                                                         src="{{ asset('upload/images/testimonials/' . $value->image) }}"
                                                         width="120px" alt="{{ $value->name }}"> </td>
@@ -84,7 +86,8 @@
                                     <tfoot>
                                         <tr>
                                             <th>S.N</th>
-                                            <th>Title</th>
+                                            <th>Name</th>
+                                            <th class="text-center">Designation</th>
                                             <th class="text-center">Image</th>
                                             <th>Message</th>
                                             <th class="text-center">Status</th>

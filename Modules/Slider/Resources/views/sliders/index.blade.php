@@ -33,6 +33,7 @@
                                             <th>S.N</th>
                                             <th>Title</th>
                                             <th class="text-center">Image</th>
+                                            <th class="text-center">Short Description</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Action</th>
                                         </tr>
@@ -42,6 +43,7 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $value->title }}</td>
+                                                <td>{!! $value->short_description !!}</td>
                                                 <td class="text-center"><img
                                                         src="{{ asset('upload/images/sliders/' . $value->image) }}"
                                                         width="120px" alt="{{ $value->name }}"> </td>

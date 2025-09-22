@@ -38,8 +38,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('device-purchases/{devicePurchase}', [DevicePurchaseController::class, 'update'])->name('device_purchases_update');
     Route::delete('device-purchases/{devicePurchase}', [DevicePurchaseController::class, 'destroy'])->name('device_purchase_destroy');
     Route::get('inventries', [DevicePurchaseController::class, 'getInventories'])->name('inventries');
-    Route::get('device_purchase_machineries_accessories/{id}', [DevicePurchaseController::class, 'showMachineriesAccessories'])
-        ->name('device_purchase_machineries_accessories');
+    Route::resource('inventories', InventoryController::class);
+
+    Route::get('device_purchase_products/{id}', [DevicePurchaseController::class, 'showproducts'])
+        ->name('device_purchase_products');
 
     // Sales Routes
     Route::resource('sales', SalesController::class)->names('sales');
@@ -52,4 +54,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('stock-issue', StockIssueController::class)->names('stock-issue');
     Route::post('stock-issue/accept/{id}', [StockIssueController::class, 'accept'])->name('stock-issue.accept');
     Route::post('stock-issue/reject/{id}', [StockIssueController::class, 'reject'])->name('stock-issue.reject');
+
+    Route::put('/stock-transfers/{id}/status', [StockController::class, 'updateStatus'])
+        ->name('stock-transfers.updateStatus');
 });

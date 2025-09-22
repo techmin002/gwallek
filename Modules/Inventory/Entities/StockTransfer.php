@@ -4,6 +4,7 @@ namespace Modules\Inventory\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Product\Models\Product;
 
 class StockTransfer extends Model
 {
@@ -29,26 +30,21 @@ class StockTransfer extends Model
     {
         return $this->belongsTo(Branch::class, 'to_branch_id');
     }
-
-    public function machineries()
+    public function products()
     {
         return $this->belongsToMany(
-            Machineries::class,
-            'stock_transfer_machineries',
-            'stock_transfer_id', // Foreign key on stock_transfer_machineries table
-            'machinery_id',      // Foreign key on the related model (if different from machinery_id)
-            'id',                // Local key on stock_transfers table
-            'id'                 // Local key on machineries table
+            Product::class,             // Related model
+            'stock_transfer_products',  // Pivot table name
+            'stock_transfer_id',        // Foreign key on pivot for StockTransfer
+            'product_id'                // Foreign key on pivot for Product
         )->withPivot(['quantity', 'serial_numbers', 'condition']);
     }
-
-    public function accessories()
-{
-    return $this->belongsToMany(Accessories::class, 'stock_transfer_accessories', 
-        'stock_transfer_id', // Foreign key on stock_transfer_accessories table
-        'accessory_id',      // Foreign key on the related model (if different from accessories_id)
-        'id',               // Local key on stock_transfers table
-        'id'                // Local key on accessories table
-    )->withPivot(['quantity', 'serial_numbers', 'condition']);
-}
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function getTotalQuantityAttribute()
+    {
+        return $this->products->sum('pivot.quantity');
+    }
 }

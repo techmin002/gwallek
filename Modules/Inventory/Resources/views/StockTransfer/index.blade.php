@@ -1,6 +1,6 @@
 @extends('setting::layouts.master')
 
-@section('title', "Stock Transfer")
+@section('title', 'Stock Transfer')
 @section('breadcrumb')
     <ol class="breadcrumb border-0 m-0 bg-light rounded shadow-sm px-3 py-2">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
@@ -11,21 +11,21 @@
 @section('content')
     <div class="content-wrapper bg-white rounded shadow-sm p-3">
         <!-- Error Display Section -->
-        @if($errors->any())
+        @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <h5><i class="icon fas fa-ban"></i> Validation Errors!</h5>
                 <ul class="mb-0">
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
         @endif
-        
-        @if(session('success'))
+
+        @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -34,8 +34,8 @@
                 {{ session('success') }}
             </div>
         @endif
-        
-        @if(session('error'))
+
+        @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -66,7 +66,8 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card shadow-sm border-0">
-                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <div
+                                class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                                 <h3 class="card-title mb-0">Stock Transfer List</h3>
                                 <div class="ml-auto">
                                     <a class="btn btn-light text-primary font-weight-bold" data-toggle="modal"
@@ -88,56 +89,119 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($stockTransfers as $key => $transfer)
-                                        <tr>
-                                            <td class="text-center align-middle">{{ $key + 1 }}</td>
-                                            <td class="text-center align-middle">{{ optional($transfer->fromBranch)->name ?? 'N/A' }}</td>
-                                            <td class="text-center align-middle">{{ optional($transfer->toBranch)->name ?? 'N/A' }}</td>
-                                            <td class="text-center align-middle">
-                                                {{
-                                                    ($transfer->accessories && $transfer->accessories->count() > 0 ? $transfer->accessories->sum('pivot.quantity') : 0)
-                                                    +
-                                                    ($transfer->machineries && $transfer->machineries->count() > 0 ? $transfer->machineries->sum('pivot.quantity') : 0)
-                                                }}
-                                            </td>
-                                            <td class="text-center align-middle">
-                                                {{ $transfer->transfer_date ? \Carbon\Carbon::parse($transfer->transfer_date)->format('d M Y') : 'N/A' }}
-                                            </td>
-                                            <td class="text-center align-middle">
-                                                <span class="badge
-                                                    @if($transfer->status == 'pending') badge-warning
-                                                    @elseif($transfer->status == 'in_transit') badge-info
-                                                    @elseif($transfer->status == 'completed') badge-success
-                                                    @elseif($transfer->status == 'cancelled') badge-danger
-                                                    @endif py-2 px-3 font-weight-bold text-uppercase">
-                                                    {{ ucfirst($transfer->status) }}
-                                                </span>
-                                            </td>
-                                            <td class="text-center align-middle">
-                                                <div class="btn-group">
-                                                    <button class="btn btn-info btn-sm" data-toggle="modal"
-                                                        data-target="#viewTransfer{{ $transfer->id }}"
-                                                        title="View Details">
-                                                        <i class="fa fa-eye"></i>
-                                                    </button>
-                                                    @include('inventory::StockTransfer.view', ['transfer' => $transfer])
-                                                    
-                                                    @if($transfer->status == 'pending' || $transfer->status == 'in_transit')
-                                                      <a href="{{ route('stock-transfers.edit', $transfer->id) }}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
-                                                    @endif
-                                                    
-                                                    <form action="{{ route('stock-transfers.destroy', $transfer->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm" 
-                                                            onclick="return confirm('Are you sure?')"
-                                                            title="Delete">
-                                                            <i class="fa fa-trash"></i>
+                                        @foreach ($stockTransfers as $key => $transfer)
+                                            <tr>
+                                                <td class="text-center align-middle">{{ $key + 1 }}</td>
+                                                <td class="text-center align-middle">
+                                                    {{ optional($transfer->fromBranch)->name ?? 'N/A' }}</td>
+                                                <td class="text-center align-middle">
+                                                    {{ optional($transfer->toBranch)->name ?? 'N/A' }}</td>
+                                                <td class="text-center align-middle">
+                                                    {{ $transfer->total_quantity ?? 'N/A' }}
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    {{ $transfer->transfer_date ? \Carbon\Carbon::parse($transfer->transfer_date)->format('d M Y') : 'N/A' }}
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <span
+                                                        class="badge
+        @if ($transfer->status == 'pending') badge-warning
+        @elseif($transfer->status == 'in_transit') badge-info
+        @elseif($transfer->status == 'completed') badge-success
+        @elseif($transfer->status == 'cancelled') badge-danger @endif py-2 px-3 font-weight-bold text-uppercase">
+                                                        {{ ucfirst($transfer->status) }}
+                                                    </span>
+
+                                                    {{-- Status Change Button --}}
+                                                    @if (
+                                                        $transfer->status == 'pending' ||
+                                                            ($transfer->status == 'in_transit' && auth()->user()->branch_id == $transfer->to_branch_id))
+                                                        <button class="btn btn-sm btn-secondary ml-2" data-toggle="modal"
+                                                            data-target="#statusModal{{ $transfer->id }}">
+                                                            <i class="fa fa-exchange-alt"></i>
                                                         </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
+
+                                                        <!-- Status Change Modal -->
+                                                        <div class="modal fade" id="statusModal{{ $transfer->id }}"
+                                                            tabindex="-1" role="dialog"
+                                                            aria-labelledby="statusModalLabel{{ $transfer->id }}"
+                                                            aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                                <form
+                                                                    action="{{ route('stock-transfers.updateStatus', $transfer->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header bg-primary text-white">
+                                                                            <h5 class="modal-title"
+                                                                                id="statusModalLabel{{ $transfer->id }}">
+                                                                                Update Status
+                                                                            </h5>
+                                                                            <button type="button" class="close text-white"
+                                                                                data-dismiss="modal" aria-label="Close">
+                                                                                <span aria-hidden="true">&times;</span>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            @if ($transfer->status == 'pending')
+                                                                                <p>Do you want to dispatch this transfer?
+                                                                                </p>
+                                                                                <input type="hidden" name="status"
+                                                                                    value="in_transit">
+                                                                            @elseif ($transfer->status == 'in_transit' && auth()->user()->branch_id == $transfer->to_branch_id)
+                                                                                <p>Do you want to mark this transfer as
+                                                                                    received?</p>
+                                                                                <input type="hidden" name="status"
+                                                                                    value="completed">
+                                                                            @endif
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-light"
+                                                                                data-dismiss="modal">Cancel</button>
+                                                                            <button type="submit"
+                                                                                class="btn btn-primary">
+                                                                                Yes, Proceed
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </td>
+
+
+                                                <td class="text-center align-middle">
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-info btn-sm" data-toggle="modal"
+                                                            data-target="#viewTransfer{{ $transfer->id }}"
+                                                            title="View Details">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                        @include('inventory::StockTransfer.view', [
+                                                            'transfer' => $transfer,
+                                                        ])
+
+                                                        @if ($transfer->status == 'pending')
+                                                            <a href="{{ route('stock-transfers.edit', $transfer->id) }}"
+                                                                class="btn btn-sm btn-warning" data-toggle="tooltip"
+                                                                title="Edit"><i class="fa fa-edit"></i></a>
+                                                        @endif
+
+                                                        <form
+                                                            action="{{ route('stock-transfers.destroy', $transfer->id) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                                onclick="return confirm('Are you sure?')" title="Delete">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -154,25 +218,33 @@
             .content-wrapper {
                 background: #f8f9fa;
             }
+
             .card {
                 border-radius: 10px;
             }
-            .table th, .table td {
+
+            .table th,
+            .table td {
                 vertical-align: middle !important;
             }
+
             .btn-group .btn {
                 margin-right: 2px;
             }
+
             .btn-group .btn:last-child {
                 margin-right: 0;
             }
+
             .text-danger {
                 font-size: 0.875rem;
                 margin-top: 0.25rem;
             }
+
             .is-invalid {
                 border-color: #dc3545;
             }
+
             .alert-danger ul {
                 margin-bottom: 0;
             }
@@ -183,20 +255,23 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
         <script>
-            $(function () {
+            $(function() {
                 // Show modal if there are errors
-                @if($errors->any())
+                @if ($errors->any())
                     $('#createStockTransfer').modal('show');
                 @endif
-                
+
                 $('[data-toggle="tooltip"]').tooltip();
                 $('#example1').DataTable({
                     "responsive": true,
                     "autoWidth": false,
-                    "order": [[0, "asc"]],
-                    "columnDefs": [
-                        { "orderable": false, "targets": 6 }
-                    ]
+                    "order": [
+                        [0, "asc"]
+                    ],
+                    "columnDefs": [{
+                        "orderable": false,
+                        "targets": 6
+                    }]
                 });
             });
         </script>

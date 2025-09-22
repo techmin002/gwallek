@@ -1,3 +1,7 @@
+@php
+    $profile = Modules\Setting\Entities\CompanyProfile::first();
+    $services = Modules\Service\Models\ServiceType::where('status', 'on')->get();
+@endphp
 
 <!-- Footer -->
 <footer class="text-white-50">
@@ -6,15 +10,15 @@
             <!-- Company Info Section -->
             <div class="col-lg-4 col-md-12">
                 <div class="d-flex flex-column align-items-md-start align-items-center">
-                    <img src="https://placehold.co/180x60/3e4c62/ffffff?text=GNS+Logo"
+                    <img src="{{ asset('upload/images/settings/' . $profile->footer_logo) }}"
                         alt="Gwallek Nirman Sewa Logo" class="footer-logo mb-4">
                     <p class="text-center text-md-start">Gwallek Nirman Sewa Pvt. Ltd. has been one of Nepal's leading
                         construction companies since 1999, committed to excellence and national development.</p>
                     <div class="social-icons-footer mt-4">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="{{ $profile->facebook }}"><i class="fab fa-facebook-f"></i></a>
+                        <a href="{{ $profile->twitter }}"><i class="fab fa-twitter"></i></a>
+                        <a href="{{ $profile->linkdin ?? '#' }}"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="{{ $profile->instagram }}"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
             </div>
@@ -24,10 +28,10 @@
                 <div class="footer-links">
                     <h5>Quick Links</h5>
                     <ul class="d-flex flex-column align-items-center align-items-md-start">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About Us</a></li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="{{ route('frontend.aboutus') }}">About Us</a></li>
                         <li><a href="#services">Services</a></li>
-                        <li><a href="#projects">Projects</a></li>
+                        <li><a href="{{ route('frontend.project') }}">Projects</a></li>
                     </ul>
                 </div>
             </div>
@@ -37,12 +41,16 @@
                 <div class="footer-links">
                     <h5>Our Services</h5>
                     <ul class="d-flex flex-column align-items-center align-items-md-start">
-                        <li><a href="#">Hydropower Projects</a></li>
-                        <li><a href="#">Road & Bridge Projects</a></li>
+                        @foreach ($services as $item)
+                            <li><a href="{{ route('frontend.details_service', $item->id) }}">{{ $item->name }}</a>
+                            </li>
+                        @endforeach
+
+                        {{-- <li><a href="#">Road & Bridge Projects</a></li>
                         <li><a href="#">Building Development</a></li>
                         <li><a href="#">Water Supply & Sanitation</a></li>
                         <li><a href="#">Irrigation Projects</a></li>
-                        <li><a href="#">River Training Projects</a></li>
+                        <li><a href="#">River Training Projects</a></li> --}}
                     </ul>
                 </div>
             </div>
@@ -51,9 +59,9 @@
             <div class="col-lg-3 col-md-12">
                 <div class="footer-contact">
                     <h5>Contact Info</h5>
-                    <p><i class="icon fas fa-map-marker-alt"></i> Jawlakhel, Lalitpur, Nepal</p>
-                    <p><i class="icon fas fa-phone-alt"></i> +977-9764638130</p>
-                    <p><i class="icon fas fa-envelope"></i> gwallekpvt.ltd@gmail.com</p>
+                    <p><i class="icon fas fa-map-marker-alt"></i>{{ $profile->company_address }}</p>
+                    <p><i class="icon fas fa-phone-alt"></i>{{ $profile->company_phone }}</p>
+                    <p><i class="icon fas fa-envelope"></i> {{ $profile->company_email }}</p>
                     <p class="mt-4 text-center text-md-start">Our business hours are Monday to Friday, 9:00 AM to 5:00
                         PM. Feel free to contact us with any inquiries during this time.</p>
 
@@ -64,7 +72,7 @@
         <!-- Copyright Section -->
         <div class="row">
             <div class="col-12 text-center copyright">
-                <p class="mb-0">&copy; 2025 Gwallek Nirman Sewa Pvt. Ltd. All Rights Reserved.</p>
+                <p class="mb-0">{{ $profile->footer_text }}</p>
             </div>
         </div>
     </div>
@@ -72,6 +80,7 @@
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- Owl Carousel JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 <!-- Add these scripts before your closing body tag -->
@@ -542,6 +551,44 @@
         modal.hide();
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+
+
+<script>
+  const lightbox = GLightbox({
+    selector: '.glightbox',
+    touchNavigation: true,
+    loop: true,
+    zoomable: true,
+    draggable: true,
+    closeButton: true, // show close button
+    svg: {
+      close: '<i class="fa-solid fa-xmark fa-2x text-white position-absolute top-3 end-3"></i>',
+      next: '<i class="fa-solid fa-chevron-right fa-3x text-white position-absolute top-50 end-3 translate-middle-y"></i>',
+      prev: '<i class="fa-solid fa-chevron-left fa-3x text-white position-absolute top-50 start-3 translate-middle-y"></i>'
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
+<script>
+  Fancybox.bind("[data-fancybox='gallery']", {
+    Thumbs: false,
+    Toolbar: {
+      display: [
+        { id: "close", position: "right" },
+        "zoom",
+        "slideshow",
+        "fullscreen"
+      ],
+    },
+    Carousel: {
+      Navigation: true, // Show arrows
+    },
+    dragToClose: false,
+    animated: true,
+  });
+</script>
+
 
 </body>
 

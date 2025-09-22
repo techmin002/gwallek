@@ -15,28 +15,24 @@ use Modules\Inventory\Entities\StockTransferMachineries;
 use Modules\Inventory\Entities\Inventory;
 use Modules\Inventory\Entities\User;
 use Illuminate\Validation\ValidationException;
+use Modules\Product\Models\Product;
 
 class StockController extends Controller
 {
     public function index()
     {
-        $accessories = Accessories::all();
-        $machineries = Machineries::all();
+        $products = Product::all();
         $branches = Branch::all();
         $user = User::all();
-        $stockTransfers = StockTransfer::with(['accessories', 'machineries', 'fromBranch', 'toBranch'])->get();
-        $stockaccessories = StockTransferAccessories::with('accessory')->get();
-        $stockmachineries = StockTransferMachineries::with('machinery')->get();
+        $stockTransfers = StockTransfer::with(['products', 'fromBranch', 'toBranch', 'creator'])->get();
         return view('inventory::stocktransfer.index', compact(
             'stockTransfers',
-            'accessories',
-            'machineries',
             'branches',
-            'stockaccessories',
-            'stockmachineries',
+            'products',
             'user'
         ));
     }
+
 
     public function store(Request $request)
     {
@@ -44,61 +40,48 @@ class StockController extends Controller
             // Validate request data
             $validated = $request->validate([
                 'from_branch_id' => 'required|exists:branches,id',
-                'to_branch_id' => 'required|exists:branches,id|different:from_branch_id',
-                'transfer_date' => 'required|date',
-                'status' => 'required|in:pending,in_transit,completed,cancelled',
-                'remarks' => 'nullable|string',
-                'accessories' => 'sometimes|array',
-                'accessories.*.accessory_id' => 'required_with:accessories|exists:accessories,id',
-                'accessories.*.quantity' => 'required_with:accessories|integer|min:1',
-                'accessories.*.serial_numbers' => 'nullable|string',
-                'accessories.*.condition' => 'required_with:accessories|in:new,used,refurbished,damaged',
-                'machineries' => 'sometimes|array',
-                'machineries.*.machinery_id' => 'required_with:machineries|exists:machineries,id',
-                'machineries.*.quantity' => 'required_with:machineries|integer|min:1',
-                'machineries.*.serial_numbers' => 'nullable|string',
-                'machineries.*.condition' => 'required_with:machineries|in:new,used,refurbished,damaged',
+                'to_branch_id'   => 'required|exists:branches,id|different:from_branch_id',
+                'transfer_date'  => 'required|date',
+                'remarks'        => 'nullable|string',
+                'products'       => 'required|array|min:1',
+                'products.*.product_id' => 'required|exists:products,id',
+                'products.*.quantity'   => 'required|integer|min:1',
+                'products.*.serial_numbers' => 'nullable|string',
+                'products.*.condition'  => 'required|in:new,used,refurbished,damaged',
             ]);
 
-            // Validate stock availability
-            $this->validateStockAvailability($validated);
+            // ✅ Stock availability check (still keeping)
+            foreach ($validated['products'] as $product) {
+                $inventory = Inventory::where('branch_id', $validated['from_branch_id'])
+                    ->where('product_id', $product['product_id'])
+                    ->first();
 
-            DB::beginTransaction();
-
-            // Create the stock transfer
-            $stockTransfer = StockTransfer::create([
-                'from_branch_id' => $validated['from_branch_id'],
-                'to_branch_id' => $validated['to_branch_id'],
-                'transfer_date' => $validated['transfer_date'],
-                'status' => $validated['status'],
-                'remarks' => $validated['remarks'] ?? null,
-                'created_by' => Auth::id(),
-            ]);
-
-            // Process accessories
-            if (!empty($validated['accessories'])) {
-                foreach ($validated['accessories'] as $accessory) {
-                    $this->createTransferAccessory($stockTransfer, $accessory);
-                    $this->updateInventory(
-                        null,
-                        $accessory['accessory_id'],
-                        $validated['from_branch_id'],
-                        -$accessory['quantity']
-                    );
+                if (!$inventory || $inventory->quantity < $product['quantity']) {
+                    $productName = Product::find($product['product_id'])->name ?? 'Unknown Product';
+                    $branchName  = Branch::find($validated['from_branch_id'])->name ?? 'Unknown Branch';
+                    throw new \Exception("Not enough stock for {$productName} in {$branchName}");
                 }
             }
 
-            // Process machineries
-            if (!empty($validated['machineries'])) {
-                foreach ($validated['machineries'] as $machinery) {
-                    $this->createTransferMachinery($stockTransfer, $machinery);
-                    $this->updateInventory(
-                        $machinery['machinery_id'],
-                        null,
-                        $validated['from_branch_id'],
-                        -$machinery['quantity']
-                    );
-                }
+            DB::beginTransaction();
+
+            // ✅ Create the stock transfer
+            $stockTransfer = StockTransfer::create([
+                'from_branch_id' => $validated['from_branch_id'],
+                'to_branch_id'   => $validated['to_branch_id'],
+                'transfer_date'  => $validated['transfer_date'],
+                'status'         => 'pending',
+                'remarks'        => $validated['remarks'] ?? null,
+                'created_by'     => Auth::id(),
+            ]);
+
+            // ✅ Attach products to stock transfer (no inventory changes)
+            foreach ($validated['products'] as $product) {
+                $stockTransfer->products()->attach($product['product_id'], [
+                    'quantity'       => $product['quantity'],
+                    'serial_numbers' => $product['serial_numbers'] ?? null,
+                    'condition'      => $product['condition'],
+                ]);
             }
 
             DB::commit();
@@ -117,6 +100,7 @@ class StockController extends Controller
                 ->withInput();
         }
     }
+
 
     protected function validateStockAvailability($validatedData)
     {
@@ -216,45 +200,45 @@ class StockController extends Controller
         $inventory->save();
     }
 
-    public function updateStatus(Request $request, StockTransfer $stockTransfer)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,in_transit,completed,cancelled'
-        ]);
+    // public function updateStatus(Request $request, StockTransfer $stockTransfer)
+    // {
+    //     $request->validate([
+    //         'status' => 'required|in:pending,in_transit,completed,cancelled'
+    //     ]);
 
-        DB::beginTransaction();
+    //     DB::beginTransaction();
 
-        try {
-            $oldStatus = $stockTransfer->status;
-            $newStatus = $request->status;
+    //     try {
+    //         $oldStatus = $stockTransfer->status;
+    //         $newStatus = $request->status;
 
-            $stockTransfer->update([
-                'status' => $newStatus,
-                'updated_by' => Auth::id()
-            ]);
+    //         $stockTransfer->update([
+    //             'status' => $newStatus,
+    //             'updated_by' => Auth::id()
+    //         ]);
 
-            // Handle inventory changes based on status
-            if ($oldStatus !== $newStatus) {
-                if ($newStatus === 'completed') {
-                    // Add to destination branch
-                    $this->processStatusChange($stockTransfer, $stockTransfer->to_branch_id, 1);
-                } elseif ($newStatus === 'cancelled' && $oldStatus !== 'completed') {
-                    // Return to source branch
-                    $this->processStatusChange($stockTransfer, $stockTransfer->from_branch_id, 1);
-                } elseif ($oldStatus === 'completed' && $newStatus !== 'completed') {
-                    // Reverse from destination branch
-                    $this->processStatusChange($stockTransfer, $stockTransfer->to_branch_id, -1);
-                }
-            }
+    //         // Handle inventory changes based on status
+    //         if ($oldStatus !== $newStatus) {
+    //             if ($newStatus === 'completed') {
+    //                 // Add to destination branch
+    //                 $this->processStatusChange($stockTransfer, $stockTransfer->to_branch_id, 1);
+    //             } elseif ($newStatus === 'cancelled' && $oldStatus !== 'completed') {
+    //                 // Return to source branch
+    //                 $this->processStatusChange($stockTransfer, $stockTransfer->from_branch_id, 1);
+    //             } elseif ($oldStatus === 'completed' && $newStatus !== 'completed') {
+    //                 // Reverse from destination branch
+    //                 $this->processStatusChange($stockTransfer, $stockTransfer->to_branch_id, -1);
+    //             }
+    //         }
 
-            DB::commit();
+    //         DB::commit();
 
-            return back()->with('success', 'Status updated successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Error updating status: ' . $e->getMessage());
-        }
-    }
+    //         return back()->with('success', 'Status updated successfully!');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return back()->with('error', 'Error updating status: ' . $e->getMessage());
+    //     }
+    // }
 
     protected function processStatusChange(StockTransfer $stockTransfer, int $branchId, int $multiplier)
     {
@@ -281,153 +265,65 @@ class StockController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'from_branch_id' => 'required|exists:branches,id',
-            'to_branch_id' => 'required|exists:branches,id|different:from_branch_id',
-            'transfer_date' => 'required|date',
-            'status' => 'required|in:pending,in_transit,completed,cancelled',
-            'remarks' => 'nullable|string|max:500',
-            'accessories' => 'sometimes|array',
-            'accessories.*.id' => 'required_with:accessories|exists:accessories,id',
-            'accessories.*.quantity' => 'required_with:accessories|integer|min:1',
-            'accessories.*.condition' => 'required_with:accessories|in:new,used,refurbished,damaged',
-            'accessories.*.serial_numbers' => 'nullable|string',
-            'new_accessories' => 'sometimes|array',
-            'new_accessories.*.id' => 'required_with:new_accessories|exists:accessories,id',
-            'new_accessories.*.quantity' => 'required_with:new_accessories|integer|min:1',
-            'new_accessories.*.condition' => 'required_with:new_accessories|in:new,used,refurbished,damaged',
-            'new_accessories.*.serial_numbers' => 'nullable|string',
-            'machineries' => 'sometimes|array',
-            'machineries.*.id' => 'required_with:machineries|exists:machineries,id',
-            'machineries.*.quantity' => 'required_with:machineries|integer|min:1',
-            'machineries.*.condition' => 'required_with:machineries|in:new,used,refurbished,damaged',
-            'machineries.*.serial_numbers' => 'nullable|string',
-            'new_machineries' => 'sometimes|array',
-            'new_machineries.*.id' => 'required_with:new_machineries|exists:machineries,id',
-            'new_machineries.*.quantity' => 'required_with:new_machineries|integer|min:1',
-            'new_machineries.*.condition' => 'required_with:new_machineries|in:new,used,refurbished,damaged',
-            'new_machineries.*.serial_numbers' => 'nullable|string'
-        ]);
-
-        DB::beginTransaction();
-
         try {
-            $transfer = StockTransfer::with(['accessories', 'machineries'])->findOrFail($id);
-
-            if (!in_array($transfer->status, ['pending', 'in_transit'])) {
-                throw new \Exception('Only pending or in-transit transfers can be modified');
-            }
-
-            $this->validateStockUpdate($transfer, $validated);
-
-            $originalAccessories = $transfer->accessories->keyBy('id');
-            $originalMachineries = $transfer->machineries->keyBy('id');
-
-            $transfer->update([
-                'from_branch_id' => $validated['from_branch_id'],
-                'to_branch_id' => $validated['to_branch_id'],
-                'transfer_date' => $validated['transfer_date'],
-                'status' => $validated['status'],
-                'remarks' => $validated['remarks'],
-                'updated_by' => auth()->id()
+            $validated = $request->validate([
+                'from_branch_id' => 'required|exists:branches,id',
+                'to_branch_id'   => 'required|exists:branches,id|different:from_branch_id',
+                'transfer_date'  => 'required|date',
+                'remarks'        => 'nullable|string',
+                'products'       => 'required|array|min:1',
+                'products.*.product_id' => 'required|exists:products,id',
+                'products.*.quantity'   => 'required|integer|min:1',
+                'products.*.serial_numbers' => 'nullable|string',
+                'products.*.condition'  => 'required|in:new,used,refurbished,damaged',
+            ], [
+                'to_branch_id.different' => 'From branch and To branch must be different.',
             ]);
 
-            if (isset($validated['accessories'])) {
-                $accessoriesData = [];
-                foreach ($validated['accessories'] as $accessory) {
-                    $accessoryId = $accessory['id'];
-                    $quantityChange = $accessory['quantity'] - ($originalAccessories[$accessoryId]->pivot->quantity ?? 0);
+            DB::beginTransaction();
 
-                    $accessoriesData[$accessoryId] = [
-                        'quantity' => $accessory['quantity'],
-                        'condition' => $accessory['condition'],
-                        'serial_numbers' => $accessory['serial_numbers'] ?? null
-                    ];
+            $stockTransfer = StockTransfer::findOrFail($id);
 
-                    if ($quantityChange != 0) {
-                        $this->updateInventory(
-                            null,
-                            $accessoryId,
-                            $transfer->from_branch_id,
-                            -$quantityChange
-                        );
-                    }
-                }
-                $transfer->accessories()->sync($accessoriesData);
+            // ✅ Update stock transfer
+            $stockTransfer->update([
+                'from_branch_id' => $validated['from_branch_id'],
+                'to_branch_id'   => $validated['to_branch_id'],
+                'transfer_date'  => $validated['transfer_date'],
+                'remarks'        => $validated['remarks'] ?? null,
+                'updated_by'     => Auth::id(),
+            ]);
+
+            // ✅ Purane products hatao
+            $stockTransfer->products()->detach();
+
+            // ✅ Naye products add karo
+            foreach ($validated['products'] as $product) {
+                $stockTransfer->products()->attach($product['product_id'], [
+                    'quantity'       => $product['quantity'],
+                    'serial_numbers' => $product['serial_numbers'] ?? null,
+                    'condition'      => $product['condition'],
+                ]);
             }
-
-            if (isset($validated['new_accessories'])) {
-                foreach ($validated['new_accessories'] as $accessory) {
-                    $this->createTransferAccessory($transfer, [
-                        'accessory_id' => $accessory['id'],
-                        'quantity' => $accessory['quantity'],
-                        'condition' => $accessory['condition'],
-                        'serial_numbers' => $accessory['serial_numbers'] ?? null
-                    ]);
-
-                    $this->updateInventory(
-                        null,
-                        $accessory['id'],
-                        $transfer->from_branch_id,
-                        -$accessory['quantity']
-                    );
-                }
-            }
-
-            if (isset($validated['machineries'])) {
-                $machineriesData = [];
-                foreach ($validated['machineries'] as $machinery) {
-                    $machineryId = $machinery['id'];
-                    $quantityChange = $machinery['quantity'] - ($originalMachineries[$machineryId]->pivot->quantity ?? 0);
-
-                    $machineriesData[$machineryId] = [
-                        'quantity' => $machinery['quantity'],
-                        'condition' => $machinery['condition'],
-                        'serial_numbers' => $machinery['serial_numbers'] ?? null
-                    ];
-
-                    if ($quantityChange != 0) {
-                        $this->updateInventory(
-                            $machineryId,
-                            null,
-                            $transfer->from_branch_id,
-                            -$quantityChange
-                        );
-                    }
-                }
-                $transfer->machineries()->sync($machineriesData);
-            }
-
-            if (isset($validated['new_machineries'])) {
-                foreach ($validated['new_machineries'] as $machinery) {
-                    $this->createTransferMachinery($transfer, [
-                        'machinery_id' => $machinery['id'],
-                        'quantity' => $machinery['quantity'],
-                        'condition' => $machinery['condition'],
-                        'serial_numbers' => $machinery['serial_numbers'] ?? null
-                    ]);
-
-                    $this->updateInventory(
-                        $machinery['id'],
-                        null,
-                        $transfer->from_branch_id,
-                        -$machinery['quantity']
-                    );
-                }
-            }
-
-            $this->processRemovedItems($transfer, $validated, $originalAccessories, $originalMachineries);
 
             DB::commit();
 
             return redirect()->route('stock-transfers.index')
-                ->with('success', 'Stock transfer updated successfully');
+                ->with('success', 'Stock transfer updated successfully!');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', 'Please fix the errors below.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()
-                ->with('error', 'Error updating transfer: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Error updating stock transfer: ' . $e->getMessage())
+                ->withInput();
         }
     }
+
+
+
 
     protected function validateStockUpdate(StockTransfer $transfer, array $data)
     {
@@ -536,12 +432,14 @@ class StockController extends Controller
 
     public function edit($id)
     {
+        $stockTransfer = StockTransfer::with('products')->findOrFail($id);
         $branches = Branch::all();
-        $accessories = Accessories::all();
-        $machineries = Machineries::all();
-        $transfer = StockTransfer::find($id);
-        return view('inventory::StockTransfer.edit', compact('transfer', 'branches', 'accessories', 'machineries'));
+        $products = Product::all();
+
+        return view('inventory::StockTransfer.edit', compact('stockTransfer', 'branches', 'products'));
     }
+
+
 
     public function destroy($id)
     {
@@ -567,5 +465,66 @@ class StockController extends Controller
             return back()
                 ->with('error', 'Error deleting transfer: ' . $e->getMessage());
         }
+    }
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        $transfer = StockTransfer::with('products')->findOrFail($id);
+
+        $newStatus = $request->input('status');
+
+        if ($transfer->status == 'pending' && $newStatus == 'in_transit') {
+            // Dispatch => deduct inventory from from_branch
+            foreach ($transfer->products as $product) {
+                $inventory = Inventory::where('branch_id', $transfer->from_branch_id)
+                    ->where('product_id', $product->id)
+                    ->first();
+
+                if (!$inventory || $inventory->quantity < $product->pivot->quantity) {
+                    return back()->with('error', "Not enough stock for {$product->name} in source branch");
+                }
+
+                $inventory->decrement('quantity', $product->pivot->quantity);
+
+                // Update who modified
+                $inventory->updated_by = auth()->id();
+                $inventory->save();
+            }
+
+            $transfer->status = 'in_transit';
+        } elseif ($transfer->status == 'in_transit' && $newStatus == 'completed') {
+            // Receive => add inventory to to_branch
+            foreach ($transfer->products as $product) {
+                $inventory = Inventory::where('branch_id', $transfer->to_branch_id)
+                    ->where('product_id', $product->id)
+                    ->first();
+
+                if ($inventory) {
+                    // Already exists, just increment
+                    $inventory->increment('quantity', $product->pivot->quantity);
+                    $inventory->updated_by = auth()->id();
+                    $inventory->save();
+                } else {
+                    // Create new entry
+                    Inventory::create([
+                        'branch_id'  => $transfer->to_branch_id,
+                        'product_id' => $product->id,
+                        'quantity'   => $product->pivot->quantity,
+                        'created_by' => auth()->id(),
+                        'updated_by' => auth()->id(),
+                        'opening_quantity'   => $product->pivot->quantity,
+                    ]);
+                }
+            }
+
+            $transfer->status = 'completed';
+        } else {
+            return back()->with('error', 'Invalid status change.');
+        }
+
+        $transfer->save();
+
+        return back()->with('success', 'Status updated successfully!');
     }
 }

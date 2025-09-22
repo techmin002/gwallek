@@ -49,10 +49,23 @@
                           </p>
                       </a>
                   </li>
+                  <li class="nav-item {{ request()->routeIs('messages.index') ? 'menu-open' : '' }}">
+                      <a href="{{ route('messages.index') }}"
+                          class="nav-link {{ request()->routeIs('messages.index') ? 'active' : '' }}">
+                          <i class="nav-icon fas fa-envelope"></i>
+                          <p>
+                              Messages
+                          </p>
+                      </a>
+                  </li>
+
+
+
                   @can('access_user_management')
                       <li
                           class="nav-item {{ request()->routeIs('users.*', 'roles.*') ? 'menu-is-opening menu-open' : '' }}">
-                          <a href="#" class="nav-link" {{ request()->routeIs('users.*', 'roles.*') ? 'active' : '' }}>
+                          <a href="#" class="nav-link"
+                              {{ request()->routeIs('users.*', 'roles.*') ? 'active' : '' }}>
                               <i class="nav-icon fas fa-users"></i>
                               <p>
                                   Users Management
@@ -84,6 +97,32 @@
                           </ul>
                       </li>
                   @endcan
+                  {{-- Service --}}
+                  <li class="nav-item {{ request()->routeIs('services.*') ? 'menu-is-opening menu-open' : '' }}">
+                      <a href="#" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
+                          <i class="nav-icon fas fa-newspaper"></i> {{-- Parent icon --}}
+                          <p>
+                              Service
+                              <i class="right fas fa-angle-left"></i>
+                          </p>
+                      </a>
+                      <ul class="nav nav-treeview">
+                          <li class="nav-item">
+                              <a href="{{ route('services.index') }}"
+                                  class="nav-link {{ request()->routeIs('services.index') ? 'active' : '' }}">
+                                  <i class="fas fa-list-alt nav-icon"></i> {{-- Service list icon --}}
+                                  <p>Service</p>
+                              </a>
+                          </li>
+                          <li class="nav-item">
+                              <a href="{{ route('services.create') }}"
+                                  class="nav-link {{ request()->routeIs('services.create') ? 'active' : '' }}">
+                                  <i class="fas fa-plus-square nav-icon"></i> {{-- Create service icon --}}
+                                  <p>Create Service</p>
+                              </a>
+                          </li>
+                      </ul>
+                  </li>
                   @if (auth()->user()->access_type === 'Admin')
                   @else
                       @can('access_branch')
@@ -182,6 +221,47 @@
                           </ul>
                       </li>
                   @endcan
+
+                  {{-- Finance --}}
+                  <li
+                      class="nav-item {{ request()->routeIs('due.sites') || request()->routeIs('cash-counter.*') || request()->routeIs('finance.depositedetails') || request()->routeIs('banks.*') ? 'menu-is-opening menu-open' : '' }}">
+                      <a href="#"
+                          class="nav-link {{ request()->routeIs('due.sites') || request()->routeIs('cash-counter.*') || request()->routeIs('finance.depositedetails') || request()->routeIs('banks.*') ? 'active' : '' }}">
+                          <i class="nav-icon fas fa-coins"></i>
+                          <p>
+                              Finance
+                              <i class="right fas fa-angle-left"></i>
+                          </p>
+                      </a>
+                      <ul class="nav nav-treeview">
+                          {{-- Due Project --}}
+                          <li class="nav-item">
+                              <a href="{{ route('due.sites') }}"
+                                  class="nav-link {{ request()->routeIs('due.sites') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                                  <p>Due Project</p>
+                              </a>
+                          </li>
+
+                          {{-- Cash Counter --}}
+                          <li class="nav-item">
+                              <a href="{{ route('cash-counter.index') }}"
+                                  class="nav-link {{ request()->routeIs(['cash-counter.*', 'finance.depositedetails']) ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-cash-register"></i>
+                                  <p>Cash Counter</p>
+                              </a>
+                          </li>
+                          {{-- Cash Counter --}}
+                          <li class="nav-item">
+                              <a href="{{ route('banks.index') }}"
+                                  class="nav-link {{ request()->routeIs('banks.*') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-cash-register"></i>
+                                  <p>Bank</p>
+                              </a>
+                          </li>
+                      </ul>
+                  </li>
+
                   {{-- Product Mgnt --}}
                   @can('access_product')
                       @can('access_product')
@@ -268,12 +348,12 @@
                               </a>
                           </li>
 
-                          <li class="nav-item">
+                          {{-- <li class="nav-item">
                               <a href="{{ route('sales.index') }}"
                                   class="nav-link {{ request()->routeIs('sales.index') ? 'active' : '' }}">
                                   <p>Sales</p>
                               </a>
-                          </li>
+                          </li> --}}
                           <li class="nav-item">
                               <a href="{{ route('stock-transfers.index') }}"
                                   class="nav-link {{ request()->routeIs('stock-transfers.index') ? 'active' : '' }}">
@@ -358,19 +438,59 @@
                           </a>
                           <ul class="nav nav-treeview">
                               <li class="nav-item">
+                                  <a href="{{ route('sliders.index') }}"
+                                      class="nav-link {{ request()->routeIs('sliders.index') ? 'active' : '' }}">
+                                      <i class="nav-icon fas fa-sliders-h"></i>
+                                      <p>Sliders</p>
+                                  </a>
+                              </li>
+
+                              <li class="nav-item">
+                                  <a href="{{ route('blogs.index') }}"
+                                      class="nav-link {{ request()->routeIs('blogs.index') ? 'active' : '' }}">
+                                      <i class="nav-icon fas fa-blog"></i>
+                                      <p>Blogs</p>
+                                  </a>
+                              </li>
+                              <li class="nav-item">
+                                  <a href="{{ route('blogscomment.index') }}"
+                                      class="nav-link {{ request()->routeIs('blogscomment.*') ? 'active' : '' }}">
+                                      <i class="nav-icon fas fa-comments"></i>
+                                      <p>Blogs Comment</p>
+                                  </a>
+                              </li>
+
+
+                              <li class="nav-item">
                                   <a href="{{ route('teams.index') }}"
                                       class="nav-link {{ request()->routeIs('teams.index') ? 'active' : '' }}">
                                       <i class="nav-icon fas fa-users"></i>
                                       <p>Teams</p>
                                   </a>
                               </li>
+
+                              <li class="nav-item">
+                                  <a href="{{ route('advisors.index') }}"
+                                      class="nav-link {{ request()->routeIs('advisors.index') ? 'active' : '' }}">
+                                      <i class="nav-icon fas fa-user-tie"></i>
+                                      <p>Advisors</p>
+                                  </a>
+                              </li>
+
+                              <li class="nav-item">
+                                  <a href="{{ route('clients.index') }}"
+                                      class="nav-link {{ request()->routeIs('clients.index') ? 'active' : '' }}">
+                                      <i class="nav-icon fas fa-handshake"></i>
+                                      <p>Clients</p>
+                                  </a>
+                              </li>
+
                               <li class="nav-item">
                                   <a href="{{ route('faqs.index') }}" class="nav-link"
                                       {{ request()->routeIs('faqs.*') ? 'active' : '' }}>
                                       <i class="nav-icon fas fa-question-circle"></i>
                                       <p>
                                           FAQs
-
                                       </p>
                                   </a>
                               </li>
@@ -388,7 +508,7 @@
                                       <p>Vacancies</p>
                                   </a>
                               </li>
-                              @can('access_gallery')
+                              {{-- @can('access_gallery')
                                   <li class="nav-item">
                                       <a href="{{ route('galleries.index') }}"
                                           class="nav-link {{ request()->routeIs('galleries.index') ? 'active' : '' }}">
@@ -396,16 +516,44 @@
                                           <p>Gallery</p>
                                       </a>
                                   </li>
-                              @endcan
+                              @endcan --}}
                               @can('access_inquiries')
                                   <li class="nav-item">
-                                      <a href="{{ route('inquires.index') }}"
-                                          class="nav-link {{ request()->routeIs('inquires.index') ? 'active' : '' }}">
+                                      <a href="{{ route('inquiry.index') }}"
+                                          class="nav-link {{ request()->routeIs('inquiry.index') ? 'active' : '' }}">
                                           <i class="far fa-address-book nav-icon"></i>
                                           <p>Inquiries</p>
                                       </a>
                                   </li>
                               @endcan
+                              {{-- Message From  --}}
+                              <li
+                                  class="nav-item {{ request()->routeIs('messages.md.index') || request()->routeIs('messages.ed.index') ? 'menu-is-opening menu-open' : '' }}">
+                                  <a href="#"
+                                      class="nav-link {{ request()->routeIs('messages.md.index') || request()->routeIs('messages.ed.index') ? 'active' : '' }}">
+                                      <i class="nav-icon fas fa-envelope-open-text"></i>
+                                      <p>
+                                          Message From
+                                          <i class="right fas fa-angle-left"></i>
+                                      </p>
+                                  </a>
+                                  <ul class="nav nav-treeview">
+                                      <li class="nav-item">
+                                          <a href="{{ route('messages.md.index') }}"
+                                              class="nav-link {{ request()->routeIs('messages.md.index') ? 'active' : '' }}">
+                                              <i class="fas fa-user-tie nav-icon"></i> {{-- MD icon --}}
+                                              <p>MD</p>
+                                          </a>
+                                      </li>
+                                      <li class="nav-item">
+                                          <a href="{{ route('messages.ed.index') }}"
+                                              class="nav-link {{ request()->routeIs('messages.ed.index') ? 'active' : '' }}">
+                                              <i class="fas fa-user-shield nav-icon"></i> {{-- ED icon --}}
+                                              <p>ED</p>
+                                          </a>
+                                      </li>
+                                  </ul>
+                              </li>
                           </ul>
                       </li>
                   @endcan
@@ -448,8 +596,66 @@
                                   <p>Site</p>
                               </a>
                           </li>
+
                       </ul>
                   </li>
+
+                  <li class="nav-item {{ request()->routeIs('orders.*') ? 'menu-is-opening menu-open' : '' }}">
+                      <a href="#" class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}">
+                          <i class="nav-icon fas fa-shopping-cart"></i>
+                          <p>
+                              Purchase
+                              <i class="right fas fa-angle-left"></i>
+                          </p>
+                      </a>
+                      <ul class="nav nav-treeview">
+                          {{-- Orders --}}
+                          <li class="nav-item">
+                              <a href="{{ route('orders.index') }}"
+                                  class="nav-link {{ request()->routeIs('orders.index') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-list"></i>
+                                  <p>Orders</p>
+                              </a>
+                          </li>
+
+                          {{-- Dispatched --}}
+                          <li class="nav-item">
+                              <a href="{{ route('orders.dispatched') }}"
+                                  class="nav-link {{ request()->routeIs('orders.dispatched') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-truck"></i>
+                                  <p>Dispatched</p>
+                              </a>
+                          </li>
+
+                          {{-- Tracking --}}
+                          <li class="nav-item">
+                              <a href="{{ route('orders.tracking') }}"
+                                  class="nav-link {{ request()->routeIs('orders.tracking') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-map-marker-alt"></i>
+                                  <p>Tracking</p>
+                              </a>
+                          </li>
+
+                          {{-- Rejected --}}
+                          <li class="nav-item">
+                              <a href="{{ route('orders.rejected') }}"
+                                  class="nav-link {{ request()->routeIs('orders.rejected') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-times-circle text-danger"></i>
+                                  <p>Rejected</p>
+                              </a>
+                          </li>
+
+                          {{-- Completed --}}
+                          <li class="nav-item">
+                              <a href="{{ route('orders.completed') }}"
+                                  class="nav-link {{ request()->routeIs('orders.completed') ? 'active' : '' }}">
+                                  <i class="nav-icon fas fa-check-circle text-success"></i>
+                                  <p>Completed</p>
+                              </a>
+                          </li>
+                      </ul>
+                  </li>
+
 
                   @can('access_settings')
                       <li class="nav-item {{ request()->routeIs('company.*') ? 'menu-is-opening menu-open' : '' }}">

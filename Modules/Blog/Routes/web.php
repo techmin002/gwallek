@@ -16,6 +16,7 @@ use Modules\Blog\Http\Controllers\BlogController;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::resource('blogs', 'BlogController');
-    Route::get('blog/status/{id}',[BlogController::class,'status'])->name('blog.status');
+    Route::get('blog/status/{id}', [BlogController::class, 'status'])->name('blog.status');
+
 });
 

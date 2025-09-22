@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Branch\Entities\Branch;
+use Modules\Inventory\Models\DevicePurchaseProduct;
 
 // use Modules\Product\Database\Factories\ProductFactory;
 
@@ -50,5 +51,9 @@ class Product extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+    public function purchaseProducts()
+    {
+        return $this->hasMany(DevicePurchaseProduct::class, 'product_id');
     }
 }

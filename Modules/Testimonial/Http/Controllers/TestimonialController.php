@@ -52,11 +52,12 @@ class TestimonialController extends Controller
         }
         Testimonial::create([
             'name' => $request['name'],
+            'designation' => $request['designation'],
             'message' => $request['message'],
             'status' => $request['status'],
             'image' => $imageName
         ]);
-        
+
         return redirect()->route('testimonials.index')->with('success','Created Successfully');
     }
 
@@ -103,11 +104,12 @@ class TestimonialController extends Controller
 
         $testimonial->update([
             'name' => $request['name'],
+            'designation' => $request['designation'],
             'message' => $request['message'],
             'status' => $request['status'],
             'image' => $imageName
         ]);
-        
+
         return redirect()->route('testimonials.index')->with('success','Updated Successfully');
     }
 
@@ -121,7 +123,7 @@ class TestimonialController extends Controller
         abort_if(Gate::denies('delete_testimonials'), 403);
         $testimonial = Testimonial::findOrfail($id);
         $testimonial->delete();
-        
+
         return redirect()->route('testimonials.index')->with('success','Removed Successfully');
     }
 
@@ -136,7 +138,7 @@ class TestimonialController extends Controller
             $status = 'on';
         }
         $testimonial->update([
-           'status' => $status 
+           'status' => $status
         ]);
         return redirect()->route('testimonials.index')->with('success', 'Status Updated Successfully');
     }

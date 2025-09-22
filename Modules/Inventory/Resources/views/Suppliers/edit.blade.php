@@ -119,9 +119,9 @@
                                     <div class="form-row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label for="branch_id">Branch <span class="text-danger">*</span></label>
+                                                <label for="branch_id">Office <span class="text-danger">*</span></label>
                                                 <select class="form-control" name="branch_id" required>
-                                                    <option value="">Select Branch</option>
+                                                    <option value="">Select Office</option>
                                                     @foreach ($branches as $branch)
                                                         <option value="{{ $branch->id }}"
                                                             {{ $supplier->branch_id == $branch->id ? 'selected' : '' }}>

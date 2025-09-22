@@ -40,6 +40,16 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
+                                                <label for="designation">Designation</label>
+                                                <input type="text" name="designation" class="form-control"
+                                                    placeholder="Enter Designation ?" value="{{ old('designation') }}" required>
+                                                @error('designation')
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
                                                 <label for="image">Image </label>
 
                                                 <input type="file" id="file-ip-1" accept="image/*"
@@ -62,7 +72,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        
+
                                         <div class="col-md-6">
                                             <!-- Bootstrap Switch -->
                                             <div class="card card-secondary">

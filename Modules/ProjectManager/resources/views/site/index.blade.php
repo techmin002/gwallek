@@ -60,6 +60,7 @@
                                                 <th class="text-center">Branch</th>
                                             @endif
                                             <th class="text-center">Details</th>
+                                            <th class="text-center">Site Images & Related Project</th>
                                             <th class="text-center">Status</th>
                                             @if (auth()->user()->access_type == 'Super Admin' || auth()->user()->access_type == 'Admin')
                                                 <th class="text-center">Action</th>
@@ -87,6 +88,20 @@
                                                     <a href="{{ route('sites.details', $site->id) }}"
                                                         class="btn btn-info btn-sm">
                                                         View Details
+                                                    </a>
+                                                    <a href="{{ route('paymentdetails.index', $site->id) }}"
+                                                        class="btn btn-sm btn-info  m-1" title="Project Info">Payment
+                                                        Details
+                                                    </a>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ route('sites.images', $site->id) }}"
+                                                        class="btn btn-info btn-sm w-75">
+                                                        Site Images
+                                                    </a>
+                                                    <a href="{{ route('relatedproject.index', $site->id) }}"
+                                                        class="btn btn-info btn-sm w-75 mt-2">
+                                                        Related Project
                                                     </a>
                                                 </td>
                                                 </td>
@@ -133,6 +148,7 @@
                                                 <th class="text-center">Branch</th>
                                             @endif
                                             <th class="text-center">Details</th>
+                                            <th class="text-center">Site Images & Related Project</th>
                                             <th class="text-center">Status</th>
                                             @if (auth()->user()->access_type == 'Super Admin' || auth()->user()->access_type == 'Admin')
                                                 <th class="text-center">Action</th>

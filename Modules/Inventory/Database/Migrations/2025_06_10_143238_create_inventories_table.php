@@ -10,8 +10,7 @@ class CreateInventoriesTable extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('machinery_id')->nullable()->constrained('machineries')->nullOnDelete();
-            $table->foreignId('accessory_id')->nullable()->constrained('accessories')->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->integer('quantity')->default(0);
             $table->integer('opening_quantity')->default(0);
@@ -19,7 +18,7 @@ class CreateInventoriesTable extends Migration
             $table->boolean('status')->default(true);
             $table->timestamps();
 
-            $table->unique(['machinery_id', 'accessory_id', 'branch_id'], 'inventory_unique');
+            $table->unique(['product_id', 'branch_id'], 'inventory_unique');
         });
     }
 

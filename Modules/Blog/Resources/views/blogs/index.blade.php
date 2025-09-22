@@ -27,15 +27,15 @@
           </div>
         </div><!-- /.container-fluid -->
       </section>
-  
+
       <!-- Main content -->
       <section class="content">
         <div class="container-fluid">
           <div class="row">
             <div class="col-12">
-             
+
               <!-- /.card -->
-  
+
               <div class="card">
                 <div class="card-header">
                   <h3 class="card-title float-right"><a class="btn btn-info text-white" href="{{ route('blogs.create') }}"><i class="fa fa-plus"></i> Create</a> </h3>
@@ -47,6 +47,8 @@
                     <tr>
                       <th>S.N</th>
                       <th>Title</th>
+                      <th>Short Description</th>
+                      {{-- <th>Description</th> --}}
                       <th class="text-center">Image</th>
                       <th class="text-center">Status</th>
                       <th class="text-center">Action</th>
@@ -57,12 +59,14 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $value->title }}</td>
+                            <td>{!! $value->short_description !!}</td>
+                            {{-- <td>{!! $value->description !!}</td> --}}
                             <td class="text-center"><img src="{{ asset('upload/images/blogs/'.$value->image) }}" width="120px" alt="{{ $value->name }}"> </td>
                             <td class="text-center">
                                 @if($value->status == 'on')
                                 <a href="{{ route('blog.status',$value->id) }}" class="btn btn-success">On</a>
                                 @else
-                                <a href="{{ route('blog.status',$value->id) }}" class="btn btn-danger">Off</a> 
+                                <a href="{{ route('blog.status',$value->id) }}" class="btn btn-danger">Off</a>
                                 @endif
                             </td>
                             <td class="text-center">
@@ -85,12 +89,14 @@
                         @endforeach
                     </tbody>
                     <tfoot>
-                    <tr>
-                        <th>S.N</th>
-                        <th>Title</th>
-                        <th class="text-center">Image</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Action</th>
+                   <tr>
+                      <th>S.N</th>
+                      <th>Title</th>
+                      <th>Short Description</th>
+                      {{-- <th>Description</th> --}}
+                      <th class="text-center">Image</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-center">Action</th>
                     </tr>
                     </tfoot>
                   </table>
@@ -107,5 +113,5 @@
       </section>
       <!-- /.content -->
     </div>
- 
+
 @endsection

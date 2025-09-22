@@ -37,9 +37,9 @@
                                 <input class="form-control" placeholder="Enter VAT number" type="text" name="vat" id="vat">
                             </div>
                               <div class="mt-3 col-lg-6">
-                                <label class="form-label12">Branch ID</label>
+                                <label class="form-label12">Office</label>
                                 <select class="form-control" name="branch_id">
-                                    <option value="">Select Branch</option>
+                                    <option value="">Select Office</option>
                                     @foreach ($branches as $branch)
                                         <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                                     @endforeach

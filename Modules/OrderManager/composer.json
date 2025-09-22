@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/ordermanager",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\OrderManager\\": "app/",
+            "Modules\\OrderManager\\Database\\Factories\\": "database/factories/",
+            "Modules\\OrderManager\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\OrderManager\\Tests\\": "tests/"
+        }
+    }
+}

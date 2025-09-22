@@ -121,9 +121,62 @@
                         @endif
                     </div>
                 </div>
+                <!-- Site Details Card -->
+                <div class="card mb-3">
+                    <div class="card-header bg-secondary">
+                        <h3 class="card-title">Site Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label><strong>Description:</strong></label>
+                            <textarea class="form-control summernote" readonly>{!! $site->description ?? '-' !!}</textarea>
+                        </div>
 
+                        <!-- Overview -->
+                        <div class="mb-3">
+                            <label><strong>Overview:</strong></label>
+                            <textarea class="form-control summernote" readonly>{!! $site->overview ?? '-' !!}</textarea>
+                        </div>
 
-            </div>
+                        <!-- Key Features -->
+                        <div class="mb-3">
+                            <label><strong>Key Features:</strong></label>
+                            <textarea class="form-control summernote" readonly>{!! $site->key_features ?? '-' !!}</textarea>
+                        </div>
+
+                        <!-- Technical Specifications -->
+                        <div class="mb-3">
+                            <label><strong>Technical Specifications:</strong></label>
+                            <textarea class="form-control summernote" readonly>{!! $site->technical_specifications ?? '-' !!}</textarea>
+                        </div>
+
+                        <!-- Environmental Impact -->
+                        <div class="mb-3">
+                            <label><strong>Environmental Impact:</strong></label>
+                            <textarea class="form-control summernote" readonly>{!! $site->environmental_impact ?? '-' !!}</textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="mb-3">
+    <a href="{{ route('sites.index') }}" class="btn btn-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+</div>
         </section>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('.summernote').each(function() {
+                $(this).summernote({
+                    toolbar: false,
+                    airMode: false,
+                    disableResizeEditor: true,
+                    height: 150
+                });
+                $(this).summernote('disable');
+            });
+        });
+    </script>
 @endsection

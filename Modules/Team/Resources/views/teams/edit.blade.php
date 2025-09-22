@@ -51,6 +51,40 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
+                                                <label for="facebook">Facebook</label>
+                                                <input type="url" name="facebook" class="form-control"
+                                                    placeholder="Enter Facebook Profile Link" value="{{ $team->facebook }}">
+                                                @error('facebook')
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="twitter">Twitter</label>
+                                                <input type="url" name="twitter" class="form-control"
+                                                    placeholder="Enter Twitter Profile Link" value="{{ $team->twitter }}">
+                                                @error('twitter')
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="linkedin">LinkedIn</label>
+                                                <input type="url" name="linkedin" class="form-control"
+                                                    placeholder="Enter LinkedIn Profile Link"
+                                                    value="{{ $team->linkedin }}">
+                                                @error('linkedin')
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
                                                 <label for="phone">Contact Number</label>
                                                 <input type="number" name="phone" class="form-control"
                                                     placeholder="Enter Contact " value="{{ $team->phone }}">
@@ -82,16 +116,19 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="image">Image </label>
-                                                
-                                                <input type="file" id="file-ip-1" accept="image/*" class="form-control-file border" value="{{ old('image') }}" onchange="showPreview1(event);" name="image">
-                                                <img src="{{ asset('upload/images/teams/'.$team->image) }}" alt="{{ $team->title }}" width="200px">
+
+                                                <input type="file" id="file-ip-1" accept="image/*"
+                                                    class="form-control-file border" value="{{ old('image') }}"
+                                                    onchange="showPreview1(event);" name="image">
+                                                <img src="{{ asset('upload/images/teams/' . $team->image) }}"
+                                                    alt="{{ $team->title }}" width="200px">
                                                 @error('image')
-                                                        <p style="color: red">{{ $message }}</p>
-                                                    @enderror
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
                                                 <div class="preview mt-2">
                                                     <img src="" id="file-ip-1-preview" width="200px">
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -101,12 +138,13 @@
                                                     <h3 class="card-title">Publish</h3>
                                                 </div>
                                                 <div class="card-body">
-                                                    @if($team->status == 'on')
-                                                        <input type="checkbox" name="status" checked data-bootstrap-switch
-                                                            data-off-color="danger" data-on-color="success" >
+                                                    @if ($team->status == 'on')
+                                                        <input type="checkbox" name="status" checked
+                                                            data-bootstrap-switch data-off-color="danger"
+                                                            data-on-color="success">
                                                     @else
                                                         <input type="checkbox" name="status" data-bootstrap-switch
-                                                        data-off-color="danger" data-on-color="success">
+                                                            data-off-color="danger" data-on-color="success">
                                                     @endif
                                                 </div>
                                             </div>

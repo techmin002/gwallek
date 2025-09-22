@@ -22,7 +22,7 @@ class TeamController extends Controller
         abort_if(Gate::denies('show_teams'), 403);
         $teams = Team::latest()->get();
 
-        return view('team::teams.index',compact("teams"));
+        return view('team::teams.index', compact("teams"));
     }
 
     /**
@@ -43,26 +43,27 @@ class TeamController extends Controller
     public function store(StoreTeamRequest $request)
     {
         abort_if(Gate::denies('create_teams'), 403);
-//        dd($request->all());
+        //        dd($request->all());
         $imageName = '';
-        if ($request->image)
-        {
-            $imageName = time().'.'.$request->image->extension();
+        if ($request->image) {
+            $imageName = time() . '.' . $request->image->extension();
 
             $request->image->move(public_path('upload/images/teams'), $imageName);
-
         }
         Team::create([
-        'name' => $request['name'],
-        'email' => $request['email'],
-        'phone' => $request['phone'],
-        'designation' => $request['designation'],
-        'introduction'=> $request['introduction'],
-        'status' => $request['status'],
-        'image' => $imageName
-    ]);
-       
-       return redirect()->route('teams.index')->with('success','Created Successfully');
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'phone' => $request['phone'],
+            'designation' => $request['designation'],
+            'introduction' => $request['introduction'],
+            'status' => $request['status'],
+            'image' => $imageName,
+            'facebook'      => $request->facebook,
+            'twitter'       => $request->twitter,
+            'linkedin'      => $request->linkedin,
+        ]);
+
+        return redirect()->route('teams.index')->with('success', 'Created Successfully');
     }
 
     /**
@@ -85,7 +86,7 @@ class TeamController extends Controller
         abort_if(Gate::denies('edit_teams'), 403);
         $team = Team::findOrfail($id);
 
-        return view('team::teams.edit',compact('team'));
+        return view('team::teams.edit', compact('team'));
     }
 
     /**
@@ -97,13 +98,11 @@ class TeamController extends Controller
     public function update(UpdateTeamRequest $request, $id)
     {
         $team = Team::findOrfail($id);
-        if ($request->image)
-        {
-            $imageName = time().'.'.$request->image->extension();
+        if ($request->image) {
+            $imageName = time() . '.' . $request->image->extension();
 
             $request->image->move(public_path('upload/images/teams'), $imageName);
-
-        }else{
+        } else {
             $imageName = $team->image;
         }
         $team->update([
@@ -111,12 +110,15 @@ class TeamController extends Controller
             'email' => $request['email'],
             'phone' => $request['phone'],
             'designation' => $request['designation'],
-            'introduction'=> $request['introduction'],
+            'introduction' => $request['introduction'],
             'status' => $request['status'],
-            'image' => $imageName
+            'image' => $imageName,
+            'facebook'      => $request->facebook,
+            'twitter'       => $request->twitter,
+            'linkedin'      => $request->linkedin,
         ]);
-        
-        return redirect()->route('teams.index')->with('success','Created Successfully');
+
+        return redirect()->route('teams.index')->with('success', 'Created Successfully');
     }
 
     /**
@@ -129,22 +131,21 @@ class TeamController extends Controller
         abort_if(Gate::denies('delete_teams'), 403);
         $team = Team::findOrfail($id);
         $team->delete();
-        
-        return redirect()->route('teams.index')->with('success','Removed Successfully');
+
+        return redirect()->route('teams.index')->with('success', 'Removed Successfully');
     }
 
     public function status($id)
     {
         abort_if(Gate::denies('access_teams'), 403);
         $team = Team::findOrfail($id);
-        if($team->status == 'on')
-        {
+        if ($team->status == 'on') {
             $status = 'off';
-        }else{
+        } else {
             $status = 'on';
         }
         $team->update([
-           'status' => $status 
+            'status' => $status
         ]);
         return redirect()->route('teams.index')->with('success', 'Status Updated Successfully');
     }

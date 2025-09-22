@@ -27,7 +27,15 @@ class Site extends Model
         'branch_id',
         'assign_to',
         'customer_id',
-        'status'
+        'status',
+        'location',
+        'progress_status',
+        'project_area',
+        'contract_id',
+        'overview',
+        'key_features',
+        'technical_specifications',
+        'environmental_impact',
     ];
 
     protected $dates = ['start_date', 'end_date'];
@@ -51,8 +59,26 @@ class Site extends Model
     {
         return $this->hasMany(ProjectAssignment::class, 'site_id');
     }
+
+    public function images()
+    {
+        return $this->hasMany(SiteImages::class);
+    }
     // protected static function newFactory(): SiteFactory
     // {
     //     // return SiteFactory::new();
     // }
+    public function relatedProjects()
+    {
+        return $this->hasMany(RelatedProject::class, 'site_id', 'id');
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(SitePayment::class);
+    }
+    public function paymentDetails()
+    {
+        return $this->hasMany(SitePaymentDetails::class, 'site_id');
+    }
 }

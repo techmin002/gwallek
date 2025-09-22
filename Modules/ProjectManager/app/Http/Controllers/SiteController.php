@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Modules\Branch\Entities\Branch;
+use Modules\Finance\Models\CashCounter;
 use Modules\ProjectManager\Models\Customer;
 use Modules\ProjectManager\Models\Site;
+use Modules\ProjectManager\Models\SitePayment;
+use Modules\ProjectManager\Models\SitePaymentDetails;
 
 class SiteController extends Controller
 {
@@ -54,19 +57,36 @@ class SiteController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'branch_id' => 'required|exists:branches,id',
-            'assign_to' => 'required|exists:users,id',
-            'customer_id' => 'required|exists:customers,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'contract_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-            'description' => 'nullable|string',
-            'status' => 'required|in:on,off',
-        ]);
+        // dd($request->all());
+
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'amount' => 'required|numeric',
+        //     'start_date' => 'required|date',
+        //     'end_date' => 'nullable|date|after_or_equal:start_date',
+        //     'branch_id' => 'required|exists:branches,id',
+        //     'assign_to' => 'required|exists:users,id',
+        //     'customer_id' => 'required|exists:customers,id',
+        //     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+        //     'contract_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+        //     'description' => 'nullable|string',
+        //     'status' => 'required|in:on,off',
+        //     'location' => 'required|string|max:255',
+        //     'progress_status' => 'required|string|max:50',
+        //     'project_area' => 'required|string|max:255',
+        //     'contract_id' => 'required|string|max:100',
+        //     'overview' => 'nullable|string',
+        //     'key_features' => 'nullable|string',
+        //     'technical_specifications' => 'nullable|string',
+        //     'environmental_impact' => 'nullable|string',
+
+        //     // 'payment_method' => 'nullable|string',
+        //     // 'amount' => 'nullable|numeric',
+        //     // 'paid_amount' => 'nullable|numeric',
+        //     // 'check_number' => 'nullable|string',
+        //     // 'online_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp',
+        // ]);
+        // dd('hello');
 
         $site = new Site();
         $site->name = $request->name;
@@ -78,6 +98,16 @@ class SiteController extends Controller
         $site->customer_id = $request->customer_id;
         $site->description = $request->description;
         $site->status = $request->status;
+        $site->location = $request->location;
+        $site->progress_status = $request->progress_status;
+        $site->project_area = $request->project_area;
+        $site->contract_id = $request->contract_id;
+        $site->overview = $request->overview;
+        $site->key_features = $request->key_features;
+        $site->technical_specifications = $request->technical_specifications;
+        $site->environmental_impact = $request->environmental_impact;
+
+
 
         // Upload site image (optional)
         if ($request->hasFile('image')) {
@@ -95,8 +125,54 @@ class SiteController extends Controller
 
         $site->save();
 
+        $onlineImagePath = null;
+        if ($request->hasFile('online_image')) {
+            $onlineImage = $request->file('online_image'); // get the correct file
+            $onlineImagePath = time() . '.' . $onlineImage->getClientOriginalExtension();
+            $onlineImage->move(public_path('upload/images/Payment'), $onlineImagePath);
+        }
+
+        // Calculate paid/due amounts
+        $totalAmount = $request->amount ?? 0;
+        $paidAmount = $request->paid_amount ?? 0;
+        $dueAmount = $totalAmount - $paidAmount;
+
+        // Create payment record
+        $payment = SitePayment::create([
+            'site_id' => $site->id,
+            'amount' => $totalAmount,
+            'paid_amount' => $paidAmount,
+            'due_amount' => $dueAmount,
+            'payment_method' => $request->payment_method,
+            'check_number' => $request->check_number,
+            'online_image' => $onlineImagePath,
+        ]);
+        SitePaymentDetails::create([
+            'site_id' => $site->id,
+            'payment_id' => $payment->id,
+            'amount' => $paidAmount,
+            'payment_method' => $request->payment_method,
+            'check_number' => $request->check_number,
+            'online_image' => $onlineImagePath,
+            'date' => now(), // you can replace with $request->date if needed
+        ]);
+
+        if ($request->payment_method === 'cash') {
+            $cashCounter = CashCounter::first();
+            if ($cashCounter) {
+                $cashCounter->opening_amount = ($cashCounter->opening_amount ?? 0) + $paidAmount;
+                $cashCounter->due_amount = ($cashCounter->due_amount ?? 0) + $paidAmount;
+                $cashCounter->save();
+            } else {
+                CashCounter::create([
+                    'opening_amount' => $paidAmount,
+                    'due_amount'     => $paidAmount,
+                ]);
+            }
+        }
         return redirect()->back()->with('success', 'Site created successfully!');
     }
+
 
 
     /**
@@ -120,6 +196,7 @@ class SiteController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         $site = Site::findOrFail($id);
 
         // Validate input
@@ -131,13 +208,21 @@ class SiteController extends Controller
             'branch_id' => 'required|exists:branches,id',
             'assign_to' => 'required|exists:users,id',
             'customer_id' => 'required|exists:customers,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'contract_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'location' => 'required|string|max:255',
+            'progress_status' => 'required|in:ongoing,completed',
+            'project_area' => 'required|string|max:255',
+            'contract_id' => 'required|string|max:255',
+            'overview' => 'required|string',
+            'key_features' => 'nullable|string',
+            'technical_specifications' => 'nullable|string',
+            'environmental_impact' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+            'contract_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
             'status' => 'nullable|in:on,off',
             'description' => 'nullable|string',
         ]);
 
-        // Update basic fields
+        // Update fields
         $site->name = $request->name;
         $site->amount = $request->amount;
         $site->start_date = $request->start_date;
@@ -145,29 +230,34 @@ class SiteController extends Controller
         $site->branch_id = $request->branch_id;
         $site->assign_to = $request->assign_to;
         $site->customer_id = $request->customer_id;
+        $site->location = $request->location;
+        $site->progress_status = $request->progress_status;
+        $site->project_area = $request->project_area;
+        $site->contract_id = $request->contract_id;
+        $site->overview = $request->overview;
+        $site->key_features = $request->key_features;
+        $site->technical_specifications = $request->technical_specifications;
+        $site->environmental_impact = $request->environmental_impact;
         $site->description = $request->description;
         $site->status = $request->has('status') && $request->status === 'on' ? 'on' : 'off';
 
-        // Handle site image
+        // Upload site image (optional)
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($site->image && file_exists(public_path('upload/sites/' . $site->image))) {
                 unlink(public_path('upload/sites/' . $site->image));
             }
-
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
-            $request->file('image')->move(public_path('upload/sites'), $imageName);
+            $imageName = time() . '_' . $request->image->getClientOriginalName();
+            $request->image->move(public_path('upload/sites/'), $imageName);
             $site->image = $imageName;
         }
 
-        // Handle contract image
+        // Upload contract paper (required)
         if ($request->hasFile('contract_image')) {
-            if ($site->contract_image && file_exists(public_path('upload/sites/' . $site->contract_image))) {
-                unlink(public_path('upload/sites/' . $site->contract_image));
+            if ($site->contract_image && file_exists(public_path('upload/sites/contracts/' . $site->contract_image))) {
+                unlink(public_path('upload/sites/contracts/' . $site->contract_image));
             }
-
-            $contractName = time() . '_' . $request->file('contract_image')->getClientOriginalName();
-            $request->file('contract_image')->move(public_path('upload/sites'), $contractName);
+            $contractName = time() . '_' . $request->contract_image->getClientOriginalName();
+            $request->contract_image->move(public_path('upload/sites/contracts/'), $contractName);
             $site->contract_image = $contractName;
         }
 
@@ -175,6 +265,7 @@ class SiteController extends Controller
 
         return redirect()->back()->with('success', 'Site updated successfully!');
     }
+
 
 
     /**

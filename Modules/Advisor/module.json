@@ -1,0 +1,11 @@
+{
+    "name": "Advisor",
+    "alias": "advisor",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Advisor\\Providers\\AdvisorServiceProvider"
+    ],
+    "files": []
+}

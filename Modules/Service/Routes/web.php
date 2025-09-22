@@ -1,25 +1,39 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
+use App\Http\Controllers\FrontendController;
 use Illuminate\Support\Facades\Route;
-use Modules\Service\Http\Controllers\GalleryController;
-use Modules\Service\Http\Controllers\ServiceCategoryController;
 use Modules\Service\Http\Controllers\ServiceController;
-Route::group(['middleware' => 'auth'], function () {
-    Route::resource('services', ServiceController::class);
-    Route::resource('galleries', GalleryController::class);
-    Route::get('service/status/{id}', [ServiceController::class,'status'])->name('services.status');
-    Route::get('service-category/status/{id}', [ServiceCategoryController::class,'status'])->name('services_category.status');
-    Route::resource('services_category', ServiceCategoryController::class);
-});
+use Modules\Service\Http\Controllers\ServiceTypeController;
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('services', ServiceController::class)->names('services');
+    Route::get('services/status/{id}', [ServiceController::class, 'status'])->name('services.status');
+
+    // Create page per service
+    Route::get('/create/{service}', [ServiceTypeController::class, 'create'])
+        ->name('type.create');
+
+    // Store new Why Choose
+    Route::post('/store', [ServiceTypeController::class, 'store'])
+        ->name('type.store');
+
+    // Edit Why Choose
+    Route::get('/edit/{id}', [ServiceTypeController::class, 'edit'])
+        ->name('type.edit');
+
+    // Update Why Choose
+    Route::put('/update/{id}', [ServiceTypeController::class, 'update'])
+        ->name('type.update');
+
+    // Delete Why Choose
+    Route::delete('/delete/{id}', [ServiceTypeController::class, 'destroy'])
+        ->name('type.delete');
+
+    // Status toggle
+    Route::get('/status/{id}', [ServiceTypeController::class, 'status'])
+        ->name('type.status');
+
+    Route::get('/galleries', [ServiceTypeController::class, 'galleries'])
+        ->name('galleries.index');
+});
+Route::get('services/details/{id}', [FrontendController::class, 'details'])->name('services.details');

@@ -11,6 +11,7 @@ use Modules\Blog\DataTables\BlogDataTable;
 use Modules\Blog\Entities\Blog;
 use Modules\Blog\Http\Requests\StoreBlogRequest;
 use Modules\Blog\Http\Requests\UpdateBlogRequest;
+use Modules\Blog\Models\BlogComment;
 
 class BlogController extends Controller
 {
@@ -21,8 +22,8 @@ class BlogController extends Controller
     public function index()
     {
         abort_if(Gate::denies('show_blogs'), 403);
-        $blogs = Blog::orderBy('created_at','DESC')->get();
-        return view('blog::blogs.index',compact('blogs'));
+        $blogs = Blog::orderBy('created_at', 'DESC')->get();
+        return view('blog::blogs.index', compact('blogs'));
     }
 
     /**
@@ -40,22 +41,22 @@ class BlogController extends Controller
      * @param Request $request
      * @return Renderable
      */
-    public function store(StoreBlogRequest $request)
+    public function store(Request $request)
     {
+        // dd($request->all());
         abort_if(Gate::denies('create_blogs'), 403);
         $imageName = '';
-       $slug = Str::slug($request->title);
-        if ($request->image)
-        {
-            $imageName = time().'.'.$request->image->extension();
+        $slug = Str::slug($request->title);
+        if ($request->image) {
+            $imageName = time() . '.' . $request->image->extension();
 
             $request->image->move(public_path('upload/images/blogs'), $imageName);
-
         }
         Blog::create([
             'title' => $request['title'],
-            'description'=> $request['description'],
-            'slug'=> $slug,
+            'description' => $request['description'],
+            'short_description' => $request['short_description'],
+            'slug' => $slug,
             'status' => $request['status'],
             'image' => $imageName
         ]);
@@ -71,7 +72,7 @@ class BlogController extends Controller
      */
     public function show($id)
     {
-        // 
+        //
     }
 
     /**
@@ -83,7 +84,7 @@ class BlogController extends Controller
     {
         abort_if(Gate::denies('edit_blogs'), 403);
         $blog = Blog::findOrfail($id);
-        return view('blog::blogs.edit',compact('blog'));
+        return view('blog::blogs.edit', compact('blog'));
     }
 
     /**
@@ -92,37 +93,36 @@ class BlogController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function update(UpdateBlogRequest $request, $id)
+    public function update(Request $request, $id)
     {
+        // dd($request->all());
         abort_if(Gate::denies('edit_blogs'), 403);
         $request->validate([
             'title' => 'required',
+            'short_description' => 'required',
             'description' => 'required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp',
         ]);
         $blog = Blog::findOrfail($id);
         $imageName = '';
         $slug = Str::slug($request->title);
-        if ($request->image)
-        {
-            $imageName = time().'.'.$request->image->extension();
+        if ($request->image) {
+            $imageName = time() . '.' . $request->image->extension();
 
             $request->image->move(public_path('upload/images/blogs'), $imageName);
-
-        }
-        else{
+        } else {
             $imageName = $blog->image;
         }
-        if($request['status'] == 'on')
-        {
+        if ($request['status'] == 'on') {
             $status = 'on';
-        }else{
+        } else {
             $status = 'off';
         }
         $blog->update([
             'title' => $request['title'],
-            'description'=> $request['description'],
-            'slug'=> $slug,
+            'short_description' => $request['short_description'],
+            'description' => $request['description'],
+            'slug' => $slug,
             'status' => $status,
             'image' => $imageName
         ]);
@@ -145,15 +145,14 @@ class BlogController extends Controller
     {
         abort_if(Gate::denies('access_blogs'), 403);
         $blog = Blog::findOrfail($id);
-        if($blog->status == 'on')
-        {
+        if ($blog->status == 'on') {
             $status = 'off';
-        }else{
+        } else {
             $status = 'on';
         }
         $blog->update([
-           'status' => $status 
+            'status' => $status
         ]);
         return redirect()->route('blogs.index')->with('success', 'Status Updated Successfully');
-    } 
+    }
 }

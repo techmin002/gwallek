@@ -3,20 +3,17 @@
 namespace Modules\Inventory\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Product\Models\Product;
 
 class Inventory extends Model
 {
     protected $fillable = [
-        'machinery_id', 'accessory_id', 'branch_id', 'quantity', 'opening_quantity', 'updated_by', 'status',
+        'product_id', 'branch_id', 'quantity', 'opening_quantity', 'updated_by', 'status',
     ];
 
-    public function machineries()
+    public function product()
     {
-        return $this->belongsTo(Machineries::class, 'machinery_id');
-    }
-    public function accessories()
-    {
-        return $this->belongsTo(Accessories::class, 'accessory_id');
+        return $this->belongsTo(Product::class);
     }
     public function branch()
     {

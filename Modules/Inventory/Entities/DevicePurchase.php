@@ -3,6 +3,7 @@
 namespace Modules\Inventory\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Inventory\Models\DevicePurchaseProduct;
 
 class DevicePurchase extends Model
 {
@@ -24,16 +25,16 @@ class DevicePurchase extends Model
     }
 
     public function machineries()
-{
-    return $this->belongsToMany(
-        Machineries::class,
-        'device_purchase_machineries',
-        'device_purchase_id',
-        'machinery_id'  // matches your pivot column name exactly
-    )
-    ->withPivot(['quantity', 'unit_price', 'total', 'branch_id'])
-    ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(
+            Machineries::class,
+            'device_purchase_machineries',
+            'device_purchase_id',
+            'machinery_id'  // matches your pivot column name exactly
+        )
+            ->withPivot(['quantity', 'unit_price', 'total', 'branch_id'])
+            ->withTimestamps();
+    }
 
     public function supplier()
     {
@@ -49,9 +50,13 @@ class DevicePurchase extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function products()
+    {
+        return $this->hasMany(DevicePurchaseProduct::class, 'device_purchase_id');
+    }
     // If using route model binding
-public function getRouteKeyName()
-{
-    return 'id'; // or whatever field you're using
-}
+    public function getRouteKeyName()
+    {
+        return 'id'; // or whatever field you're using
+    }
 }

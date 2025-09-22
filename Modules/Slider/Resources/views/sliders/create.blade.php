@@ -48,7 +48,7 @@
                                             </div>
                                         </div>
 
-                                        {{-- <div class="col-md-12">
+                                         <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="short_description">Short Description</label>
                                         <textarea type="text" name="short_description" class="summernote" placeholder="Enter short_description" >{{old('short_description')}}</textarea>
@@ -57,6 +57,7 @@
                                         @enderror
                                     </div>
                                 </div>
+                                {{--
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="description">Description</label>

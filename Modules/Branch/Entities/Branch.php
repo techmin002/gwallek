@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Employee\Entities\Employee;
+use Modules\Finance\Models\Bank;
 use Modules\ProjectManager\Models\Customer;
 use Modules\ProjectManager\Models\Site;
 
@@ -34,4 +35,9 @@ class Branch extends Model
     {
         return $this->hasMany(Site::class, 'branch_id');
     }
+    public function banks()
+    {
+        return $this->hasMany(Bank::class);
+    }
+
 }

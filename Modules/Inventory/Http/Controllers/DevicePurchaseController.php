@@ -15,19 +15,39 @@ use Modules\Inventory\Entities\Machineries;
 use Modules\Inventory\Entities\Supplier;
 use Modules\Inventory\Entities\Branch;
 use Modules\Inventory\Entities\User;
+use Modules\Inventory\Entities\DevicePurchaseProduct;
+use Modules\Product\Models\Product;
 
 class DevicePurchaseController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
         $suppliers = Supplier::all();
         $branches = Branch::all();
         $users = User::all();
-        $accessories = Accessories::all();
-        $machineries = Machineries::all();
-        $devicepurchases = DevicePurchase::with('supplier')->get();
-        return view('inventory::DevicePurchase.index', compact('devicepurchases', 'suppliers', 'branches', 'users', 'accessories', 'machineries'));
+        $products = Product::all();
+
+        $query = DevicePurchase::with('supplier');
+
+        // Branch filter
+        if ($user->name !== 'Super Admin' && $user->branch_id) {
+            $query->where('branch_id', $user->branch_id);
+        }
+
+        $devicepurchases = $query->get();
+
+        return view('inventory::DevicePurchase.index', compact(
+            'devicepurchases',
+            'suppliers',
+            'branches',
+            'users',
+            'products'
+        ));
     }
+
+
 
     public function store(Request $request): RedirectResponse
     {
@@ -40,19 +60,14 @@ class DevicePurchaseController extends Controller
             'status' => 'required|boolean',
             'description' => 'nullable|string',
 
-            'accessories' => 'nullable|array',
-            'accessories.*.id' => 'required|exists:accessories,id',
-            'accessories.*.quantity' => 'required|integer|min:1',
-            'accessories.*.price' => 'required|numeric|min:0',
-            'accessories.*.branch_id' => 'required|exists:branches,id',
-
-            'machineries' => 'nullable|array',
-            'machineries.*.id' => 'required|exists:machineries,id',
-            'machineries.*.quantity' => 'required|integer|min:1',
-            'machineries.*.price' => 'required|numeric|min:0',
-            'machineries.*.branch_id' => 'required|exists:branches,id',
+            'products' => 'required|array|min:1',
+            'products.*product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
+            'products.*.total' => 'required|numeric|min:0',
         ]);
 
+        // dd($request->all());
         DB::transaction(function () use ($request) {
             $receiptPath = null;
             if ($request->hasFile('receipt')) {
@@ -61,6 +76,7 @@ class DevicePurchaseController extends Controller
                 $receiptPath = 'upload/images/receipts/' . $imageName;
             }
 
+            // Create Device Purchase
             $devicePurchase = DevicePurchase::create([
                 'supplier_id' => $request->supplier_id,
                 'branch_id' => $request->branch_id,
@@ -72,81 +88,41 @@ class DevicePurchaseController extends Controller
                 'created_by' => auth()->id(),
             ]);
 
-            // Handle accessories
-            if ($request->filled('accessories')) {
-                foreach ($request->accessories as $acc) {
-                    $total = $acc['quantity'] * $acc['price'];
-                    $accessory_purchase = DevicePurchaseAccessory::create([
-                        'device_purchase_id' => $devicePurchase->id,
-                        'accessory_id' => $acc['id'],
-                        'branch_id' => $acc['branch_id'],
-                        'quantity' => $acc['quantity'],
-                        'unit_price' => $acc['price'],
-                        'total' => $total,
-                    ]);
+            // Save Products
+            foreach ($request->products as $prod) {
+                $productPurchase = DevicePurchaseProduct::create([
+                    'device_purchase_id' => $devicePurchase->id,
+                    'product_id' => $prod['product_id'],
+                    'quantity' => $prod['quantity'],
+                    'unit_price' => $prod['price'],
+                    'total' => $prod['total'],
+                ]);
 
-                    // Update inventory for accessory
-                    $inventory = Inventory::firstOrNew([
-                        'accessory_id' => $acc['id'],
-                        'branch_id' => $acc['branch_id'],
-                        'machinery_id' => null,
-                    ]);
+                // Update Inventory
+                $inventory = Inventory::firstOrNew([
+                    'product_id' => $prod['product_id'],
+                    'branch_id' => $request->branch_id,
+                ]);
 
-                    // Always increase opening_quantity with new purchases
-                    $inventory->opening_quantity += $acc['quantity'];
-                    
-                    // For quantity, add only if inventory exists, otherwise set to purchased quantity
-                    if ($inventory->exists) {
-                        $inventory->quantity += $acc['quantity'];
-                    } else {
-                        $inventory->quantity = $acc['quantity'];
-                        $inventory->status = true;
-                    }
+                // Opening qty update
+                $inventory->opening_quantity = ($inventory->opening_quantity ?? 0) + $prod['quantity'];
 
-                    $inventory->updated_by = auth()->id();
-                    $inventory->save();
+                // Current stock update
+                if ($inventory->exists) {
+                    $inventory->quantity += $prod['quantity'];
+                } else {
+                    $inventory->quantity = $prod['quantity'];
+                    $inventory->status = true;
                 }
-            }
 
-            // Handle machineries
-            if ($request->filled('machineries')) {
-                foreach ($request->machineries as $mach) {
-                    $total = $mach['quantity'] * $mach['price'];
-                    $machineryPurchase = DevicePurchaseMachinery::create([
-                        'device_purchase_id' => $devicePurchase->id,
-                        'machinery_id' => $mach['id'],
-                        'branch_id' => $mach['branch_id'],
-                        'quantity' => $mach['quantity'],
-                        'unit_price' => $mach['price'],
-                        'total' => $total,
-                    ]);
-
-                    // Update inventory for machinery
-                    $inventory = Inventory::firstOrNew([
-                        'machinery_id' => $mach['id'],
-                        'branch_id' => $mach['branch_id'],
-                        'accessory_id' => null,
-                    ]);
-
-                    // Always increase opening_quantity with new purchases
-                    $inventory->opening_quantity += $mach['quantity'];
-                    
-                    // For quantity, add only if inventory exists, otherwise set to purchased quantity
-                    if ($inventory->exists) {
-                        $inventory->quantity += $mach['quantity'];
-                    } else {
-                        $inventory->quantity = $mach['quantity'];
-                        $inventory->status = true;
-                    }
-
-                    $inventory->updated_by = auth()->id();
-                    $inventory->save();
-                }
+                $inventory->updated_by = auth()->id();
+                $inventory->save();
             }
         });
 
         return back()->with('success', 'Device purchase stored successfully.');
     }
+
 
     public function edit(DevicePurchase $devicePurchase)
     {
@@ -155,20 +131,16 @@ class DevicePurchaseController extends Controller
         $suppliers = Supplier::all();
         $branches = Branch::all();
         $users = User::all();
-        $accessories = Accessories::all();
-        $machineries = Machineries::all();
-        $purchaseAccessories = DevicePurchaseAccessory::where('device_purchase_id', $devicePurchase->id)->with('accessory')->get();
-        $purchaseMachineries = DevicePurchaseMachinery::where('device_purchase_id', $devicePurchase->id)->with('machinery')->get();
+        $products = Product::all();
+        $purchaseproduct = DevicePurchaseProduct::where('device_purchase_id', $devicePurchase->id)->with('product')->get();
 
         return view('inventory::DevicePurchase.edit', compact(
             'devicePurchase',
             'suppliers',
             'branches',
             'users',
-            'accessories',
-            'machineries',
-            'purchaseAccessories',
-            'purchaseMachineries'
+            'purchaseproduct',
+            'products'
         ));
     }
 
@@ -183,31 +155,26 @@ class DevicePurchaseController extends Controller
             'status' => 'required|boolean',
             'description' => 'nullable|string',
 
-            'accessories' => 'nullable|array',
-            'accessories.*.id' => 'required|exists:accessories,id',
-            'accessories.*.quantity' => 'required|integer|min:1',
-            'accessories.*.price' => 'required|numeric|min:0',
-            'accessories.*.branch_id' => 'nullable|exists:branches,id',
-
-            'machineries' => 'nullable|array',
-            'machineries.*.id' => 'required|exists:machineries,id',
-            'machineries.*.quantity' => 'required|integer|min:1',
-            'machineries.*.price' => 'required|numeric|min:0',
-            'machineries.*.branch_id' => 'nullable|exists:branches,id',
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
+            'products.*.total' => 'required|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request, $devicePurchase) {
+            // ✅ Handle receipt update
             $receiptPath = $devicePurchase->receipt;
             if ($request->hasFile('receipt')) {
                 if ($receiptPath && file_exists(public_path($receiptPath))) {
                     unlink(public_path($receiptPath));
                 }
-
                 $imageName = time() . '.' . $request->receipt->extension();
                 $request->receipt->move(public_path('upload/images/receipts'), $imageName);
                 $receiptPath = 'upload/images/receipts/' . $imageName;
             }
 
+            // ✅ Update Device Purchase main data
             $devicePurchase->update([
                 'supplier_id' => $request->supplier_id,
                 'branch_id' => $request->branch_id,
@@ -218,153 +185,68 @@ class DevicePurchaseController extends Controller
                 'description' => $request->description,
             ]);
 
-            // Get current quantities before update for inventory adjustment
-            $currentAccessories = DevicePurchaseAccessory::where('device_purchase_id', $devicePurchase->id)
-                ->get()
-                ->keyBy('accessory_id');
-
-            $currentMachineries = DevicePurchaseMachinery::where('device_purchase_id', $devicePurchase->id)
-                ->get()
-                ->keyBy('machinery_id');
-
-            // Handle accessories update
-            if ($request->filled('accessories')) {
-                foreach ($request->accessories as $acc) {
-                    $total = $acc['quantity'] * $acc['price'];
-                    
-                    // Find or create accessory purchase record
-                    $accessoryPurchase = DevicePurchaseAccessory::updateOrCreate(
-                        [
-                            'device_purchase_id' => $devicePurchase->id,
-                            'accessory_id' => $acc['id'],
-                            'branch_id' => $acc['branch_id'] ?? $devicePurchase->branch_id,
-                        ],
-                        [
-                            'quantity' => $acc['quantity'],
-                            'unit_price' => $acc['price'],
-                            'total' => $total,
-                        ]
-                    );
-
-                    // Update inventory
-                    $inventory = Inventory::firstOrNew([
-                        'accessory_id' => $acc['id'],
-                        'branch_id' => $acc['branch_id'] ?? $devicePurchase->branch_id,
-                        'machinery_id' => null,
-                    ]);
-
-                    // Calculate difference from original purchase
-                    $originalQuantity = $currentAccessories[$acc['id']]->quantity ?? 0;
-                    $quantityDifference = $acc['quantity'] - $originalQuantity;
-
-                    // Adjust both quantities
-                    $inventory->opening_quantity += $quantityDifference;
-                    $inventory->quantity += $quantityDifference;
-
-                    if (!$inventory->exists) {
-                        $inventory->status = true;
-                    }
-
-                    $inventory->updated_by = auth()->id();
+            // ✅ Reset old products & adjust inventory
+            $oldProducts = DevicePurchaseProduct::where('device_purchase_id', $devicePurchase->id)->get();
+            foreach ($oldProducts as $old) {
+                $inventory = Inventory::where('product_id', $old->product_id)
+                    ->where('branch_id', $old->branch_id ?? $devicePurchase->branch_id)
+                    ->first();
+                if ($inventory) {
+                    $inventory->opening_quantity -= $old->quantity;
+                    $inventory->quantity -= $old->quantity;
                     $inventory->save();
                 }
             }
+            DevicePurchaseProduct::where('device_purchase_id', $devicePurchase->id)->delete();
 
-            // Handle machineries update
-            if ($request->filled('machineries')) {
-                foreach ($request->machineries as $mach) {
-                    $total = $mach['quantity'] * $mach['price'];
-                    
-                    // Find or create machinery purchase record
-                    $machineryPurchase = DevicePurchaseMachinery::updateOrCreate(
-                        [
-                            'device_purchase_id' => $devicePurchase->id,
-                            'machinery_id' => $mach['id'],
-                            'branch_id' => $mach['branch_id'] ?? $devicePurchase->branch_id,
-                        ],
-                        [
-                            'quantity' => $mach['quantity'],
-                            'unit_price' => $mach['price'],
-                            'total' => $total,
-                        ]
-                    );
+            // ✅ Insert new products & adjust inventory
+            foreach ($request->products as $prod) {
+                DevicePurchaseProduct::create([
+                    'device_purchase_id' => $devicePurchase->id,
+                    'product_id' => $prod['product_id'],
+                    'quantity' => $prod['quantity'],
+                    'unit_price' => $prod['price'],
+                    'total' => $prod['total'],
+                    'branch_id' => $prod['branch_id'] ?? $request->branch_id,
+                ]);
 
-                    // Update inventory
-                    $inventory = Inventory::firstOrNew([
-                        'machinery_id' => $mach['id'],
-                        'branch_id' => $mach['branch_id'] ?? $devicePurchase->branch_id,
-                        'accessory_id' => null,
-                    ]);
+                $inventory = Inventory::firstOrNew([
+                    'product_id' => $prod['product_id'],
+                    'branch_id' => $prod['branch_id'] ?? $request->branch_id,
+                ]);
 
-                    // Calculate difference from original purchase
-                    $originalQuantity = $currentMachineries[$mach['id']]->quantity ?? 0;
-                    $quantityDifference = $mach['quantity'] - $originalQuantity;
-
-                    // Adjust both quantities
-                    $inventory->opening_quantity += $quantityDifference;
-                    $inventory->quantity += $quantityDifference;
-
-                    if (!$inventory->exists) {
-                        $inventory->status = true;
-                    }
-
-                    $inventory->updated_by = auth()->id();
-                    $inventory->save();
+                if ($inventory->exists) {
+                    $inventory->opening_quantity += $prod['quantity'];
+                    $inventory->quantity += $prod['quantity'];
+                } else {
+                    $inventory->opening_quantity = $prod['quantity'];
+                    $inventory->quantity = $prod['quantity'];
+                    $inventory->status = true;
                 }
+
+                $inventory->updated_by = auth()->id();
+                $inventory->save();
             }
-
-            // Remove any accessories/machineries that were deleted
-            $currentAccessoryIds = collect($request->accessories ?? [])->pluck('id')->toArray();
-            $currentMachineryIds = collect($request->machineries ?? [])->pluck('id')->toArray();
-
-            DevicePurchaseAccessory::where('device_purchase_id', $devicePurchase->id)
-                ->whereNotIn('accessory_id', $currentAccessoryIds)
-                ->delete();
-
-            DevicePurchaseMachinery::where('device_purchase_id', $devicePurchase->id)
-                ->whereNotIn('machinery_id', $currentMachineryIds)
-                ->delete();
         });
 
         return redirect()->route('device-purchases.index')->with('success', 'Device purchase updated successfully.');
     }
 
+
     public function destroy(DevicePurchase $devicePurchase): RedirectResponse
     {
         DB::transaction(function () use ($devicePurchase) {
-            // First get all related items to adjust inventory
-            $accessories = DevicePurchaseAccessory::where('device_purchase_id', $devicePurchase->id)->get();
-            $machineries = DevicePurchaseMachinery::where('device_purchase_id', $devicePurchase->id)->get();
+            // Get all related products
+            $products = DevicePurchaseProduct::where('device_purchase_id', $devicePurchase->id)->get();
 
-            // Adjust inventory quantities before deletion
-            foreach ($accessories as $accessory) {
-                $inventory = Inventory::where('accessory_id', $accessory->accessory_id)
-                    ->where('branch_id', $accessory->branch_id)
+            foreach ($products as $product) {
+                $inventory = Inventory::where('product_id', $product->product_id)
+                    ->where('branch_id', $devicePurchase->branch_id)
                     ->first();
 
                 if ($inventory) {
-                    // Only decrease the quantity (keep opening_quantity as historical record)
-                    $inventory->quantity -= $accessory->quantity;
+                    $inventory->quantity -= $product->quantity;
 
-                    // If quantity would go negative, set to 0 (safety measure)
-                    if ($inventory->quantity < 0) {
-                        $inventory->quantity = 0;
-                    }
-
-                    $inventory->save();
-                }
-            }
-
-            foreach ($machineries as $machinery) {
-                $inventory = Inventory::where('machinery_id', $machinery->machinery_id)
-                    ->where('branch_id', $machinery->branch_id)
-                    ->first();
-
-                if ($inventory) {
-                    // Only decrease the quantity (keep opening_quantity as historical record)
-                    $inventory->quantity -= $machinery->quantity;
-
-                    // If quantity would go negative, set to 0 (safety measure)
                     if ($inventory->quantity < 0) {
                         $inventory->quantity = 0;
                     }
@@ -378,9 +260,8 @@ class DevicePurchaseController extends Controller
                 unlink(public_path($devicePurchase->receipt));
             }
 
-            // Delete related accessories and machineries
-            DevicePurchaseAccessory::where('device_purchase_id', $devicePurchase->id)->delete();
-            DevicePurchaseMachinery::where('device_purchase_id', $devicePurchase->id)->delete();
+            // Delete related products
+            DevicePurchaseProduct::where('device_purchase_id', $devicePurchase->id)->delete();
 
             // Delete the device purchase record
             $devicePurchase->delete();
@@ -389,32 +270,29 @@ class DevicePurchaseController extends Controller
         return redirect()->route('device-purchases.index')->with('success', 'Device purchase deleted successfully.');
     }
 
-    public function showMachineriesAccessories($id)
+
+    public function showproducts($id)
     {
-        $purchase = DevicePurchase::with('supplier')->findOrFail($id);
+        $purchase = DevicePurchase::with(['supplier'])->findOrFail($id);
 
-        $machineries = DevicePurchaseMachinery::with(['machineries', 'branch'])
-            ->where('device_purchase_id', $id)
-            ->get();
-        $accessories = DevicePurchaseAccessory::with(['accessories', 'branch'])
+        $products = DevicePurchaseProduct::with(['product', 'branch'])
             ->where('device_purchase_id', $id)
             ->get();
 
-        return view('inventory::DevicePurchase.machineries_accessories', [
+        return view('inventory::DevicePurchase.show_products', [
             'supplier' => $purchase->supplier,
             'bill_no' => $purchase->bill_no,
-            'machineries' => $machineries,
-            'accessories' => $accessories,
+            'products' => $products,
         ]);
     }
+
 
     public function getInventories()
     {
         $user = auth()->user();
 
         $query = Inventory::with([
-            'accessories:id,name',
-            'machineries:id,name',
+            'product:id,name',
             'branch:id,name',
             'user:id,name'
         ])->latest();
@@ -425,17 +303,6 @@ class DevicePurchaseController extends Controller
 
         $inventories = $query->get();
 
-        $filteredAccessories = $inventories->filter(function ($inventory) {
-            return !empty($inventory->accessories);
-        });
-
-        $filteredMachineries = $inventories->filter(function ($inventory) {
-            return !empty($inventory->machineries);
-        });
-
-        return view('inventory::inventories.index', compact(
-            'filteredAccessories',
-            'filteredMachineries'
-        ));
+        return view('inventory::inventories.index', compact('inventories'));
     }
 }

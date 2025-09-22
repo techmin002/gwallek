@@ -41,8 +41,18 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
+                                                <label for="designation">Designation</label>
+                                                <input type="text" name="designation" class="form-control"
+                                                    placeholder="Enter Designation ?" value="{{ $testimonial->designation }}" required>
+                                                @error('designation')
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
                                                 <label for="image">Image </label>
-                                                
+
                                                 <input type="file" id="file-ip-1" accept="image/*" class="form-control-file border" value="{{ old('image') }}" onchange="showPreview1(event);" name="image">
                                                 <img src="{{ asset('upload/images/testimonials/'.$testimonial->image) }}" alt="{{ $testimonial->title }}" width="200px">
                                                 @error('image')
@@ -51,7 +61,7 @@
                                                 <div class="preview mt-2">
                                                     <img src="" id="file-ip-1-preview" width="200px">
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -63,7 +73,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        
+
                                         <div class="col-md-6">
                                             <!-- Bootstrap Switch -->
                                             <div class="card card-secondary">

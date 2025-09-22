@@ -79,7 +79,9 @@
                                                 </td>
                                                 <td class="text-center">
                                                     @if ($devicePurchase->receipt)
-                                                        <a href="{{ asset($devicePurchase->receipt) }}" target="_blank" class="btn btn-secondary btn-sm" data-toggle="tooltip" data-placement="top" title="View Receipt">
+                                                        <a href="{{ asset($devicePurchase->receipt) }}" target="_blank"
+                                                            class="btn btn-secondary btn-sm" data-toggle="tooltip"
+                                                            data-placement="top" title="View Receipt">
                                                             <i class="fa fa-file-invoice" aria-hidden="true"></i>
                                                         </a>
                                                     @else
@@ -90,15 +92,22 @@
                                                     <a href="{{ route('device_purchase_edit', $devicePurchase->id) }}"
                                                         class="btn btn-primary btn-sm" data-toggle="tooltip"
                                                         data-placement="top" title="Edit"> <i class="fa fa-edit"></i></a>
-                                                    <form action="{{ route('device_purchase_destroy', $devicePurchase->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this device purchase?');">
+                                                    <form
+                                                        action="{{ route('device_purchase_destroy', $devicePurchase->id) }}"
+                                                        method="POST" style="display:inline-block;"
+                                                        onsubmit="return confirm('Are you sure you want to delete this device purchase?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Delete">
+                                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                            data-toggle="tooltip" data-placement="top" title="Delete">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
 
-                                                     <a href="{{ route('device_purchase_machineries_accessories', $devicePurchase->id) }}" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="View Machineries and Accessories"><i class="fa fa-wrench" ></i></a>
+                                                    <a href="{{ route('device_purchase_products', $devicePurchase->id) }}"
+                                                        class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                        data-placement="top" title="View Products"><i
+                                                            class="fa fa-wrench"></i></a>
 
                                                     </a>
 

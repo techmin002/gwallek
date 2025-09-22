@@ -51,7 +51,15 @@ class BranchController extends Controller
                 'admin_email' => 'required|email|max:255|unique:users,email',
                 'admin_phone' => ['required'],
                 'admin_address' => ['required'],
+
+                'phone2'        => ['nullable'],
+                'email2'        => ['nullable', 'email', 'max:255'],
+                'opening_hours' => ['nullable', 'string'],
+                'facilities'    => ['nullable', 'string'],
+                'map'           => ['nullable', 'string'],
             ]);
+
+            // dd($request->all());
 
             $role = Role::where('name', 'Admin')->first();
 
@@ -59,8 +67,13 @@ class BranchController extends Controller
             $branch = new Branch();
             $branch->name = $request->name;
             $branch->email = $request->email;
+            $branch->email2 = $request->email2;
             $branch->phone = $request->phone;
+            $branch->phone2 = $request->phone2;
             $branch->address = $request->address;
+            $branch->opening_hours = $request->opening_hours;
+            $branch->facilities = $request->facilities;
+            $branch->map = $request->map;
             $branch->status = $request->status ?? 'on';
             $branch->save();
 
@@ -134,9 +147,14 @@ class BranchController extends Controller
         // dd($request->all());
         $branch = Branch::findOrfail($id);
         $branch->name = $request['name'];
-        $branch->email = $request['email'];
-        $branch->phone = $request['phone'];
-        $branch->address = $request['address'];
+        $branch->email = $request->email;
+        $branch->email2 = $request->email2;
+        $branch->phone = $request->phone;
+        $branch->phone2 = $request->phone2;
+        $branch->address = $request->address;
+        $branch->opening_hours = $request->opening_hours;
+        $branch->facilities = $request->facilities;
+        $branch->map = $request->map;
         $branch->save();
 
         $user = User::where('id', $request['userId'])->first();

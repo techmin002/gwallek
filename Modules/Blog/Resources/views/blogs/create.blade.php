@@ -50,6 +50,15 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label for="short_description">Short Description</label>
+                                                <textarea type="text" name="short_description" class="summernote" placeholder="Enter Short Description">{{ old('short_description') }}</textarea>
+                                                @error('short_description')
+                                                    <p style="color: red">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label for="description">Description</label>
                                                 <textarea type="text" name="description" class="summernote" placeholder="Enter Description">{{ old('description') }}</textarea>
                                                 @error('description')
@@ -60,7 +69,6 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="image">Image </label>
-
                                                 <input type="file" id="file-ip-1" accept="image/*"
                                                     class="form-control-file border" value="{{ old('image') }}"
                                                     onchange="showPreview1(event);" name="image">
@@ -159,6 +167,12 @@
             $(this).parent('.remove').remove();
             e.preventDefault();
         });
+
+        $('#product-form').on('submit', function() {
+            $('textarea.summernote').each(function() {
+                $(this).val($(this).summernote('code'));
+            });
+        });
     </script>
-   
+
 @endsection

@@ -1,14 +1,15 @@
-<div class="modal fade" data-backdrop="static" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg"  role="document">
+<div class="modal fade" data-backdrop="static" id="exampleModalCenter" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content" style="border-radius: 8px;">
             <div class="modal-header justify-content-center" style="background-color: #007bff; color: #ffff;">
                 <h4 class="modal-title fs-5" id="staticBackdropLabel">Create Branch </h4>
                 <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
-                  </button>
+                </button>
             </div>
-            <form action="{{ route('branches.store') }}" class="needs-validation" novalidate id="expenseForm" method="post">
+            <form action="{{ route('branches.store') }}" class="needs-validation" novalidate id="expenseForm"
+                method="post">
                 @csrf
                 <div class="modal-body">
                     <div class="container">
@@ -16,47 +17,77 @@
                             <div class="col-md-12">
                                 <h5>Branch Detail's</h5>
                             </div>
-
-
                         </div>
+
                         <div class="row mt-2">
-                            <div class="col-lg-6" data-select2-id="select2-data-5-a5wr">
+                            <div class="col-lg-6">
                                 <label class="form-label12" for="name">Branch Name <span
                                         class="text-danger">*</span></label>
                                 <input class="form-control" placeholder="Enter branch Name" type="text"
                                     name="name" id="name" required>
-                                    <div class="invalid-feedback">
-                                        Please Enter Branch Name first!
-                                      </div>
+                                <div class="invalid-feedback">
+                                    Please Enter Branch Name first!
+                                </div>
                             </div>
                             <div class="col-lg-6">
-                                <label class="form-label12" for="phone">Contact Number <span
+                                <label class="form-label12" for="phone">Primary Contact Number <span
                                         class="text-danger">*</span></label>
-                                <input class="form-control" placeholder="Enter Title" type="text" minlength="10"
-                                    maxlength="10" name="phone" id="phone" required>
-                                    <div class="invalid-feedback">
-                                        Please Enter Branch Contact Number first!
-                                      </div>
+                                <input class="form-control" placeholder="Enter primary phone" type="text"
+                                    minlength="10" maxlength="10" name="phone" id="phone" required>
+                                <div class="invalid-feedback">
+                                    Please Enter Branch Contact Number first!
+                                </div>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-lg-6">
-                                <label class="form-label12" for="address">Address <span
-                                        class="text-danger">*</span></label>
-                                <input class="form-control" placeholder="Enter address" type="text" name="address"
-                                    id="address" required>
-                                    <div class="invalid-feedback">
-                                        Please Enter Branch Address first!
-                                      </div>
+                                <label class="form-label12" for="phone2">Secondary Contact Number
+                                    <small>Optional</small></label>
+                                <input class="form-control" placeholder="Enter secondary phone" type="text"
+                                    minlength="10" maxlength="10" name="phone2" id="phone2">
                             </div>
-
                             <div class="col-lg-6">
-                                <label class="form-label12" for="email">Email <small>Optional</small></label>
-                                <input class="form-control" placeholder="Enter branch email" type="email"
+                                <label class="form-label12" for="email">Primary Email <small>Optional</small></label>
+                                <input class="form-control" placeholder="Enter primary email" type="email"
                                     name="email" id="email">
                             </div>
                         </div>
 
+                        <div class="row mt-2">
+                            <div class="col-lg-6">
+                                <label class="form-label12" for="email2">Secondary Email
+                                    <small>Optional</small></label>
+                                <input class="form-control" placeholder="Enter secondary email" type="email"
+                                    name="email2" id="email2">
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="form-label12" for="address">Address</label>
+                                <input class="form-control" placeholder="Enter Address"
+                                    type="text" name="address" id="address">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 mt-2">
+                            <label class="form-label12" for="map">Google Map URL
+                                <small>Optional</small></label>
+                            <input class="form-control" placeholder="Paste Google Maps iframe URL here" type="text"
+                                name="map" id="map">
+                        </div>
+
+
+                        <div class="col-lg-12 mt-2">
+                            <label class="form-label12" for="opening_hours">Opening Hours
+                                <small>Optional</small></label>
+                            <textarea name="opening_hours" id="" class="form-control summernote"></textarea>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-lg-12">
+                                <label class="form-label12" for="facilities">Facilities
+                                    <small>Optional</small></label>
+                                <textarea name="facilities" id="" class="form-control summernote"></textarea>
+                            </div>
+                        </div>
                         <div class="row mt-2 bg-secondary">
                             <div class="col-md-12">
                                 <h5>Admin Detail's</h5>
@@ -64,32 +95,40 @@
                         </div>
                         <div class="row mt-2">
                             <div class="col-md-6">
-                                <label class="form-label12" for="name">Admin Name <span class="text-danger"></span></label>
-                                <input class="form-control" placeholder="Enter Admin Name" type="text" required name="admin name">
+                                <label class="form-label12" for="name">Admin Name <span
+                                        class="text-danger"></span></label>
+                                <input class="form-control" placeholder="Enter Admin Name" type="text" required
+                                    name="admin name">
                                 <div class="invalid-feedback">
                                     Please Enter Admin Name first!
-                                  </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label12" for="phone">Admin Phone <span class="text-danger"></span></label>
-                                <input class="form-control" placeholder="Enter Admin phone" maxlength="10" minlength="10" type="text" required name="admin_phone">
+                                <label class="form-label12" for="phone">Admin Phone <span
+                                        class="text-danger"></span></label>
+                                <input class="form-control" placeholder="Enter Admin phone" maxlength="10"
+                                    minlength="10" type="text" required name="admin_phone">
                                 <div class="invalid-feedback">
                                     Please Enter Admin Phone first!
-                                  </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label12" for="email">Admin Email <span class="text-danger"></span></label>
-                                <input class="form-control" placeholder="Enter Admin email" type="email" required name="admin_email">
+                                <label class="form-label12" for="email">Admin Email <span
+                                        class="text-danger"></span></label>
+                                <input class="form-control" placeholder="Enter Admin email" type="email" required
+                                    name="admin_email">
                                 <div class="invalid-feedback">
                                     Please Enter Admin Email first!
-                                  </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label12" for="admin_address">Admin Address <span class="text-danger"></span></label>
-                                <input class="form-control" placeholder="Enter Admin address" type="text" required name="admin_address">
+                                <label class="form-label12" for="admin_address">Admin Address <span
+                                        class="text-danger"></span></label>
+                                <input class="form-control" placeholder="Enter Admin address" type="text" required
+                                    name="admin_address">
                                 <div class="invalid-feedback">
                                     Please Enter Admin Address first!
-                                  </div>
+                                </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
@@ -105,7 +144,7 @@
                                         </div>
                                         <div class="invalid-feedback">
                                             Please Enter Password first!
-                                          </div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -124,7 +163,7 @@
                                         </div>
                                         <div class="invalid-feedback">
                                             Please Enter Confirm Password first!
-                                          </div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -147,7 +186,8 @@
                 </div>
                 <div class="modal-footer justify-content-start d-flex">
 
-                    <button type="submit" name="submit" id="btnSubmit" class="btn btn-primary w-25">Save Changes</button>
+                    <button type="submit" name="submit" id="btnSubmit" class="btn btn-primary w-25">Save
+                        Changes</button>
 
                     <button type="reset" class="btn btn-danger w-25">Reset Branch</button>
                 </div>
@@ -183,24 +223,43 @@
         });
 
     });
-    </script>
-    <script>
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
-        (function() {
-          'use strict';
-          window.addEventListener('load', function() {
+</script>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
             // Fetch all the forms we want to apply custom Bootstrap validation styles to
             var forms = document.getElementsByClassName('needs-validation');
             // Loop over them and prevent submission
             var validation = Array.prototype.filter.call(forms, function(form) {
-              form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-              }, false);
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
             });
-          }, false);
-        })();
-        </script>
+        }, false);
+    })();
+</script>
+<script>
+    $(document).ready(function() {
+        $('.summernote').summernote({
+            height: 150,
+            placeholder: 'Enter details here...',
+            callbacks: {
+                onChange: function(contents, $editable) {
+                    $(this).val(contents); // textarea ke value ko update karta hai
+                }
+            }
+        });
+    });
+    $('#branchForm').on('submit', function(e) {
+        $('.summernote').each(function() {
+            var content = $(this).summernote('code'); // Summernote content
+            $(this).val(content); // textarea value update
+        });
+    });
+</script>

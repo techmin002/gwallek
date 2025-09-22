@@ -55,11 +55,11 @@ class SliderController extends Controller
             'title' => $request['title'],
             'link' => $request['link'],
             'short_description'=> $request['short_description'],
-            'description'=> $request['description'],
+            // 'description'=> $request['description'],
             'status' => $request['status'],
             'image' => $imageName
         ]);
-        
+
         return redirect()->route('sliders.index')->with('success','Created Successfully');
     }
 
@@ -111,7 +111,7 @@ class SliderController extends Controller
             'status' => $request['status'],
             'image' => $imageName
         ]);
-        
+
         return redirect()->route('sliders.index')->with('success','Updated Successfully');
     }
 
@@ -125,7 +125,7 @@ class SliderController extends Controller
         abort_if(Gate::denies('delete_sliders'), 403);
         $slider = Slider::findOrfail($id);
         $slider->delete();
-        
+
         return redirect()->route('sliders.index')->with('success','Removed Successfully');
     }
 
@@ -140,7 +140,7 @@ class SliderController extends Controller
             $status = 'on';
         }
         $slider->update([
-           'status' => $status 
+           'status' => $status
         ]);
         return redirect()->route('sliders.index')->with('success', 'Status Updated Successfully');
     }

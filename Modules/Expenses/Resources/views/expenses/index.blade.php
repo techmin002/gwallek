@@ -50,6 +50,9 @@
                                         <tr>
                                             <th class="text-center">S.N</th>
                                             <th class="text-center">Title</th>
+                                            @if (auth()->user()->access_type === 'Super Admin')
+                                                <th class="text-center">Branch</th>
+                                            @endif
                                             <th class="text-center">Amount</th>
                                             <th class="text-center">Date</th>
                                             <th class="text-center">Mode</th>
@@ -64,9 +67,18 @@
                                             <tr>
                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">{{ $exp->title }}</td>
+                                                @if (auth()->user()->access_type === 'Super Admin')
+                                                    <td class="text-center">{{ $exp->branch?->name }}</td>
+                                                @endif
                                                 <td class="text-center">{{ $exp->amount }}</td>
                                                 <td class="text-center">{{ $exp->date }}</td>
-                                                <td class="text-center">{{ $exp->mode }}</td>
+                                                <td class="text-center">
+                                                    @if ($exp->mode === 'online' || $exp->mode === 'cheque')
+                                                        {{ ucfirst($exp->mode) }} <br> {{ $exp->bank?->bank_name }}
+                                                    @else
+                                                        {{ ucfirst($exp->mode) }}
+                                                    @endif
+                                                </td>
                                                 <td class="text-center">{{ $exp->category['title'] }}</td>
                                                 <td class="text-center">
                                                     <a href="{{ asset('upload/images/expenses-receipt/' . $exp->receipt) }}"
@@ -104,6 +116,9 @@
                                         <tr>
                                             <th class="text-center">S.N</th>
                                             <th class="text-center">Title</th>
+                                            @if (auth()->user()->access_type === 'Super Admin')
+                                                <th class="text-center">Branch</th>
+                                            @endif
                                             <th class="text-center">Amount</th>
                                             <th class="text-center">Date</th>
                                             <th class="text-center">Mode</th>

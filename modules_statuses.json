@@ -13,7 +13,13 @@
     "Expenses": true,
     "Inventory": true,
     "PettyCash": true,
-    "Finance": true,
     "Product": true,
-    "ProjectManager": true
+    "ProjectManager": true,
+    "Contact": true,
+    "OrderManager": true,
+    "Model": true,
+    "MessageFrom": true,
+    "Advisor": true,
+    "Client": true,
+    "Finance": true
 }

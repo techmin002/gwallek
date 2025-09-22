@@ -52,9 +52,9 @@
                                         {{-- <td>{!! $value->introduction !!}</td> --}}
                                         <td class="text-center">
                                             @if($value->status == 'on')
-                                            <a href="{{ route('team.status',$value->id) }}" class="btn btn-success">On</a>
+                                            <a href="{{ route('team.status',$value->id) }}" class="btn btn-success btn-sm">On</a>
                                             @else
-                                            <a href="{{ route('team.status',$value->id) }}" class="btn btn-danger">Off</a> 
+                                            <a href="{{ route('team.status',$value->id) }}" class="btn btn-danger btn-sm">Off</a>
                                             @endif
                                         </td>
                                         <td class="text-center">

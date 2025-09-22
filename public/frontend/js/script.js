@@ -247,54 +247,48 @@ $(document).ready(function () {
         
         animateElements.forEach(el => observer.observe(el));
     });
-
-       // Auto-scroll functionality
-    let scrollPosition = 0;
-    const scrollSpeed = 1; // pixels per interval
-    const scrollInterval = 30; // milliseconds
+  
+document.addEventListener('DOMContentLoaded', function () {
     const scroller = document.getElementById('teamScroller');
-    
-    // Start auto-scrolling
-    const autoScroll = setInterval(() => {
-        scrollPosition += scrollSpeed;
-        
-        // Reset to start when reaching end
-        if (scrollPosition >= scroller.scrollWidth - scroller.clientWidth) {
-            scrollPosition = 0;
-        }
-        
-        scroller.scrollLeft = scrollPosition;
-    }, scrollInterval);
-    
-    // Pause on hover
-    scroller.addEventListener('mouseenter', () => {
-        clearInterval(autoScroll);
-    });
-    
-    // Resume when mouse leaves
-    scroller.addEventListener('mouseleave', () => {
-        autoScroll = setInterval(() => {
-            scrollPosition += scrollSpeed;
-            
-            // Reset to start when reaching end
-            if (scrollPosition >= scroller.scrollWidth - scroller.clientWidth) {
-                scrollPosition = 0;
+    if (!scroller) return;
+
+    let scrollSpeed = 0.5; // pixels per frame
+    let isHover = false;
+    let autoScrollId;
+
+    function autoScroll() {
+        if (!isHover) {
+            scroller.scrollLeft += scrollSpeed;
+
+            // Loop back to start
+            if (scroller.scrollLeft >= scroller.scrollWidth - scroller.clientWidth) {
+                scroller.scrollLeft = 0;
             }
-            
-            scroller.scrollLeft = scrollPosition;
-        }, scrollInterval);
-    });
-    
-    // Manual scroll with buttons
-    function scrollTeam(direction) {
-        scrollPosition += direction * 300; // Scroll by 300px
-        if (scrollPosition < 0) scrollPosition = 0;
-        if (scrollPosition > scroller.scrollWidth - scroller.clientWidth) {
-            scrollPosition = scroller.scrollWidth - scroller.clientWidth;
         }
-        scroller.scrollLeft = scrollPosition;
+        autoScrollId = requestAnimationFrame(autoScroll);
     }
 
+    // Start auto-scroll
+    autoScroll();
+
+    // Pause on hover
+    scroller.addEventListener('mouseenter', () => isHover = true);
+    scroller.addEventListener('mouseleave', () => isHover = false);
+
+    // Manual scroll with buttons
+    window.scrollTeam = function(direction) {
+        isHover = true; // temporarily pause auto-scroll
+        const scrollAmount = 300;
+        scroller.scrollBy({
+            left: direction * scrollAmount,
+            behavior: 'smooth'
+        });
+        // Resume auto-scroll after 2 seconds
+        setTimeout(() => { isHover = false; }, 2000);
+    };
+});
+
+  
     
     document.addEventListener('DOMContentLoaded', function() {
     // Initialize advisor card animations

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Modules\ProjectManager\Models\ProjectAssignment;
 use Modules\ProjectManager\Models\Site;
+use Modules\ProjectManager\Models\SiteImages;
 
 class ProjectManagerController extends Controller
 {
@@ -119,5 +120,62 @@ class ProjectManagerController extends Controller
         $assignment->delete();
 
         return redirect()->back()->with('success', 'Staff removed from this site successfully.');
+    }
+
+    public function Siteimages($id)
+    {
+        $site = Site::with('images')->findOrFail($id);
+        return view('projectmanager::siteimage.index', compact('site'));
+    }
+
+    public function storeSiteImages(Request $request, $id)
+    {
+        // dd($request->all());
+        $site = Site::findOrFail($id);
+
+        $request->validate([
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+            'status' => 'nullable|in:on,off',
+        ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $file) {
+                $imageName = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('upload/sites/'), $imageName);
+
+                SiteImages::create([
+                    'site_id' => $site->id,
+                    'image' => $imageName,
+                    'status' => $request->status ?? 'on',
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Images uploaded successfully!');
+    }
+
+    public function siteImageStatus($id)
+    {
+        $image = SiteImages::findOrFail($id);
+
+        // Toggle status
+        $image->status = $image->status === 'on' ? 'off' : 'on';
+        $image->save();
+
+        return redirect()->back()->with('success', 'Image status updated successfully!');
+    }
+    public function destroySiteImage($id)
+    {
+        $image = SiteImages::findOrFail($id);
+
+        // Delete file from storage if exists
+        $imagePath = public_path('upload/sites/' . $image->image);
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+
+        $image->delete();
+
+        return redirect()->back()->with('success', 'Image deleted successfully!');
     }
 }
