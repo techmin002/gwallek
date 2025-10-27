@@ -2,6 +2,98 @@
   @php
       $profile = \Modules\Setting\Entities\CompanyProfile::first();
   @endphp
+  <style>
+    /* Elegant Sidebar Styling */
+.main-sidebar {
+  background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 100%);
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brand-link {
+  background: linear-gradient(90deg, #007bff, #5f27cd);
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.brand-link:hover {
+  background: linear-gradient(90deg, #5f27cd, #007bff);
+  text-decoration: none;
+  color: #fff;
+}
+
+/* Sidebar user image */
+.user-panel img {
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar Search */
+.form-control-sidebar {
+  background-color: #14213d;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.btn-sidebar {
+  background: #5f27cd;
+  color: white;
+}
+
+/* Menu items */
+.nav-sidebar .nav-item > .nav-link {
+  color: #cfd8dc;
+  border-radius: 8px;
+  margin: 3px 10px;
+  transition: all 0.3s ease;
+}
+
+.nav-sidebar .nav-item > .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+/* Active link */
+.nav-sidebar .nav-item > .nav-link.active {
+  background: linear-gradient(90deg, #007bff, #5f27cd);
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Treeview submenu */
+.nav-treeview {
+  margin-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-treeview .nav-link {
+  font-size: 0.9rem;
+  color: #b0bec5;
+  margin-left: 8px;
+}
+
+.nav-treeview .nav-link.active {
+  background: rgba(95, 39, 205, 0.2);
+  color: #fff;
+}
+
+/* Scrollbar */
+.main-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.main-sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+  </style>
   <aside class="main-sidebar elevation-4">
       <!-- Brand Logo -->
       <a href="{{ route('home') }}" class="brand-link text-center text-white" style="background-color: #007bff"

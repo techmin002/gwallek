@@ -283,6 +283,48 @@
                     </div>
                 </div>
             </div>
+             <!-- Message from Executive Director -->
+            <div class="row mt-5 g-5 align-items-center">
+                <div class="col-lg-6 order-lg-2 animate-on-scroll" data-animation="fadeInRight">
+                    <div class="director-image-container rounded-4 overflow-hidden shadow-lg">
+                        <img src="{{ asset('upload/images/message_from/' . $messages2->image) }}"
+                            class="img-fluid director-image" alt="Executive Director">
+                        <div class="director-overlay"></div>
+                        <div class="director-badge">
+                            <span class="director-title">{{ $messages2->role }}</span>
+                            <span class="director-name">{{ $messages2->name }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-lg-1 animate-on-scroll" data-animation="fadeInLeft">
+                    <div class="director-message p-4 p-md-5 rounded-4 shadow" style="background-color: #f8f9fa;">
+                        <h3 class="text-primary-custom mb-4 position-relative">
+                            <span class="title-decoration" style="background-color: #6c757d;"></span>
+                            Message from Executive Director
+                        </h3>
+                        <blockquote class="message-quote director-quote">
+                            <div class="">
+
+                            </div>
+
+                            <p>{!! $messages2->description !!}</p>
+
+                            <div class="">
+                                <i></i>
+                            </div>
+                        </blockquote>
+
+                        <div class="director-info mt-4">
+                            <h5 class="mb-0">{{ $messages2->name }}</h5>
+                            <p class="text-secondary-custom mb-0">{{ $messages2->role }}</p>
+                            <div class="signature mt-3">
+                                <img src="{{ asset('upload/images/message_from/' . $messages2->signature) }}"
+                                    alt="Signature" class="img-fluid" style="height: 40px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
