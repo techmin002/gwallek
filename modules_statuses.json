@@ -21,5 +21,6 @@
     "MessageFrom": true,
     "Advisor": true,
     "Client": true,
-    "Finance": true
+    "Finance": true,
+    "Mechanical": true
 }

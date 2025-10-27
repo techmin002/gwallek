@@ -18,6 +18,7 @@ class PaymentDetailsController extends Controller
     {
         // dd("hello");
         $site = Site::with('payment', 'paymentDetails')->findOrFail($site_id);
+        // dd($site);
 
         $totalPaid = $site->payment ? $site->payment->paid_amount : 0;
         $totalDue = $site->payment ? $site->payment->due_amount : 0;
@@ -49,7 +50,6 @@ class PaymentDetailsController extends Controller
      */
     public function store(Request $request)
     {
-        // dd('hello');
         // 1️⃣ Fetch project
         $site = Site::findOrFail($request->site_id);
 
@@ -59,16 +59,15 @@ class PaymentDetailsController extends Controller
             'payment_method' => 'required|string',
             'date' => 'required|date',
             'check_number' => 'nullable|required_if:payment_method,check|string',
-            'online_image' => 'nullable|required_if:payment_method,online|image|max:2048',
+            'online_image' => 'nullable|required_if:payment_method,online|image|max:4096',
         ]);
-        // dd('Check');
 
         // 3️⃣ Handle online image upload
         $onlineImagePath = null;
         if ($request->hasFile('online_image')) {
-            $onlineImage = $request->file('online_image'); // get the uploaded file
-            $onlineImagePath = time() . '.' . $onlineImage->getClientOriginalExtension(); // generate unique name
-            $onlineImage->move(public_path('upload/images/Payment'), $onlineImagePath); // move to public folder
+            $onlineImage = $request->file('online_image');
+            $onlineImagePath = time() . '.' . $onlineImage->getClientOriginalExtension();
+            $onlineImage->move(public_path('upload/images/Payment'), $onlineImagePath);
         }
 
         // 4️⃣ Update or create Payment record
@@ -89,15 +88,21 @@ class PaymentDetailsController extends Controller
             'date' => $request->date,
         ]);
 
-        $paidAmount =  $request->paid_amount;
+        // 6️⃣ Update Cash Counter for that branch
+        $paidAmount = $request->paid_amount;
+
         if ($request->payment_method === 'cash') {
-            $cashCounter = CashCounter::first();
+            $branchId = $site->branch_id; // site ke branch ka ID
+
+            $cashCounter = CashCounter::where('branch_id', $branchId)->first();
+
             if ($cashCounter) {
                 $cashCounter->opening_amount = ($cashCounter->opening_amount ?? 0) + $paidAmount;
-                $cashCounter->due_amount = ($cashCounter->due_amount ?? 0) + $paidAmount;
+                $cashCounter->due_amount     = ($cashCounter->due_amount ?? 0) + $paidAmount;
                 $cashCounter->save();
             } else {
                 CashCounter::create([
+                    'branch_id'      => $branchId,
                     'opening_amount' => $paidAmount,
                     'due_amount'     => $paidAmount,
                 ]);
@@ -107,6 +112,7 @@ class PaymentDetailsController extends Controller
         return redirect()->route('paymentdetails.index', $site->id)
             ->with('success', 'Payment recorded successfully!');
     }
+
 
     /**
      * Show the specified resource.

@@ -1,0 +1,11 @@
+{
+    "name": "Mechanical",
+    "alias": "mechanical",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Mechanical\\Providers\\MechanicalServiceProvider"
+    ],
+    "files": []
+}

@@ -30,7 +30,9 @@ class FrontendController extends Controller
         $services = Service::where('status', 'on')->get();
         $messages = MessageFrom::where('role', 'Managing Director')->latest()->first();
         $profile = CompanyProfile::first();
-        return view('frontend.welcome', compact('profile', 'messages', 'services', 'tests', 'blogs', 'branches', 'clients'));
+                $messages2 = MessageFrom::where('role', 'Executive Director')->latest()->first();
+
+        return view('frontend.welcome', compact('profile', 'messages', 'services', 'tests', 'blogs', 'branches', 'clients','messages2'));
     }
     public function aboutus()
     {

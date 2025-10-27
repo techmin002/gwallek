@@ -91,23 +91,24 @@
             </div>
 
             <!-- Projects Grid -->
-<div class="row g-4">
-    @forelse($images->images as $image)
-        <div class="col-lg-4 col-md-6" data-category="ongoing hydropower">
-            <div class="project-card position-relative overflow-hidden">
-                <a href="{{ asset('upload/sites/' . $image->image) }}" class="glightbox" data-gallery="gallery1">
-                    <img src="{{ asset('upload/sites/' . $image->image) }}" 
-                         alt="Hydropower Project" class="img-fluid rounded shadow">
+            <div class="row g-4">
+                @forelse($images->images as $image)
+                    <div class="col-lg-4 col-md-6" data-category="ongoing hydropower">
+                        <div class="project-card position-relative overflow-hidden">
+                            <a href="{{ asset('upload/sites/' . $image->image) }}" class="glightbox"
+                                data-gallery="gallery1">
+                                <img src="{{ asset('upload/sites/' . $image->image) }}" alt="Hydropower Project"
+                                    class="img-fluid rounded shadow">
 
-                    <!-- Hover Icon -->
-                    <div class="hover-icon position-absolute top-50 start-50 translate-middle">
-                        <i class="fa-solid fa-plus fa-2x text-white"></i>
+                                <!-- Hover Icon -->
+                                <div class="hover-icon position-absolute top-50 start-50 translate-middle">
+                                    <i class="fa-solid fa-plus fa-2x text-white"></i>
+                                </div>
+                            </a>
+                        </div>
                     </div>
-                </a>
+                @endforeach
             </div>
-        </div>
-    @endforeach
-</div>
 
 
         </div>

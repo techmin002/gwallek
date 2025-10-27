@@ -28,9 +28,8 @@ class InquiryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function storeinquiry(Request $request)
     {
-        // dd($request->all());
         // dd($request->all());
         $request->validate([
             'name' => 'required|string|max:255',

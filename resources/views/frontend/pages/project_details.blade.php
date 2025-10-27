@@ -163,34 +163,33 @@
                         </div>
                     </div>
                 </div>
-<div class="col-lg-5 mt-4 mt-lg-0">
-    @php
-        $validImages = $site->images->filter(fn($image) => !empty($image->image));
-    @endphp
+                <div class="col-lg-5 mt-4 mt-lg-0">
+                    @php
+                        $validImages = $site->images->filter(fn($image) => !empty($image->image));
+                    @endphp
 
-    <ul class="gns-project-gallery gns-animate-on-scroll list-unstyled d-flex flex-wrap gap-2">
-        @forelse($validImages as $image)
-            @php
-                $imagePath = public_path('upload/sites/' . $image->image);
-                [$width, $height] = file_exists($imagePath) ? getimagesize($imagePath) : [null, null];
-            @endphp
-            <li class="col-6 col-md-6 col-lg-3 p-1">
-                <a href="{{ asset('upload/sites/' . $image->image) }}"
-                   class="glightbox"
-                   data-gallery="project-{{ $site->id }}"
-                   data-title="{{ $image->caption ?? 'Project Image' }}">
-                    <img src="{{ asset('upload/sites/' . $image->image) }}"
-                         alt="{{ $image->caption ?? 'Project Image' }}"
-                         class="img-fluid project-img rounded shadow-sm"
-                         @if($width && $height) width="{{ $width }}" height="{{ $height }}" @endif
-                         loading="lazy" decoding="async">
-                </a>
-            </li>
-        @empty
-            <li class="text-danger">No images available for this site.</li>
-        @endforelse
-    </ul>
-</div>
+                    <ul class="gns-project-gallery gns-animate-on-scroll list-unstyled d-flex flex-wrap gap-2">
+                        @forelse($validImages as $image)
+                            @php
+                                $imagePath = public_path('upload/sites/' . $image->image);
+                                [$width, $height] = file_exists($imagePath) ? getimagesize($imagePath) : [null, null];
+                            @endphp
+                            <li class="col-6 col-md-6 col-lg-3 p-1">
+                                <a href="{{ asset('upload/sites/' . $image->image) }}" class="glightbox"
+                                    data-gallery="project-{{ $site->id }}"
+                                    data-title="{{ $image->caption ?? 'Project Image' }}">
+                                    <img src="{{ asset('upload/sites/' . $image->image) }}"
+                                        alt="{{ $image->caption ?? 'Project Image' }}"
+                                        class="img-fluid project-img rounded shadow-sm"
+                                        @if ($width && $height) width="{{ $width }}" height="{{ $height }}" @endif
+                                        loading="lazy" decoding="async">
+                                </a>
+                            </li>
+                        @empty
+                            <li class="text-danger">No images available for this site.</li>
+                        @endforelse
+                    </ul>
+                </div>
 
 
             </div>

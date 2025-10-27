@@ -59,35 +59,24 @@ class SiteController extends Controller
     {
         // dd($request->all());
 
-        // $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'amount' => 'required|numeric',
-        //     'start_date' => 'required|date',
-        //     'end_date' => 'nullable|date|after_or_equal:start_date',
-        //     'branch_id' => 'required|exists:branches,id',
-        //     'assign_to' => 'required|exists:users,id',
-        //     'customer_id' => 'required|exists:customers,id',
-        //     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-        //     'contract_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-        //     'description' => 'nullable|string',
-        //     'status' => 'required|in:on,off',
-        //     'location' => 'required|string|max:255',
-        //     'progress_status' => 'required|string|max:50',
-        //     'project_area' => 'required|string|max:255',
-        //     'contract_id' => 'required|string|max:100',
-        //     'overview' => 'nullable|string',
-        //     'key_features' => 'nullable|string',
-        //     'technical_specifications' => 'nullable|string',
-        //     'environmental_impact' => 'nullable|string',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'branch_id' => 'required|exists:branches,id',
+            'assign_to' => 'required|exists:users,id',
+            'customer_id' => 'required|exists:customers,id',
+            'contract_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
 
-        //     // 'payment_method' => 'nullable|string',
-        //     // 'amount' => 'nullable|numeric',
-        //     // 'paid_amount' => 'nullable|numeric',
-        //     // 'check_number' => 'nullable|string',
-        //     // 'online_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp',
-        // ]);
-        // dd('hello');
+            'payment_method' => 'nullable|string|in:cash,online,check',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'check_number' => 'nullable|string',
+            'online_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
+        ]);
 
+        // ✅ Create Site
         $site = new Site();
         $site->name = $request->name;
         $site->amount = $request->amount;
@@ -107,16 +96,14 @@ class SiteController extends Controller
         $site->technical_specifications = $request->technical_specifications;
         $site->environmental_impact = $request->environmental_impact;
 
-
-
-        // Upload site image (optional)
+        // ✅ Upload site image
         if ($request->hasFile('image')) {
             $imageName = time() . '_' . $request->image->getClientOriginalName();
             $request->image->move(public_path('upload/sites/'), $imageName);
             $site->image = $imageName;
         }
 
-        // Upload contract paper (required)
+        // ✅ Upload contract image (required)
         if ($request->hasFile('contract_image')) {
             $contractName = time() . '_' . $request->contract_image->getClientOriginalName();
             $request->contract_image->move(public_path('upload/sites/contracts/'), $contractName);
@@ -125,19 +112,20 @@ class SiteController extends Controller
 
         $site->save();
 
+        // ✅ Handle Online Image Upload
         $onlineImagePath = null;
         if ($request->hasFile('online_image')) {
-            $onlineImage = $request->file('online_image'); // get the correct file
+            $onlineImage = $request->file('online_image');
             $onlineImagePath = time() . '.' . $onlineImage->getClientOriginalExtension();
             $onlineImage->move(public_path('upload/images/Payment'), $onlineImagePath);
         }
 
-        // Calculate paid/due amounts
+        // ✅ Payment calculations
         $totalAmount = $request->amount ?? 0;
         $paidAmount = $request->paid_amount ?? 0;
-        $dueAmount = $totalAmount - $paidAmount;
+        $dueAmount  = $totalAmount - $paidAmount;
 
-        // Create payment record
+        // ✅ Create Payment record
         $payment = SitePayment::create([
             'site_id' => $site->id,
             'amount' => $totalAmount,
@@ -147,6 +135,8 @@ class SiteController extends Controller
             'check_number' => $request->check_number,
             'online_image' => $onlineImagePath,
         ]);
+
+        // ✅ Store Payment Details
         SitePaymentDetails::create([
             'site_id' => $site->id,
             'payment_id' => $payment->id,
@@ -154,24 +144,31 @@ class SiteController extends Controller
             'payment_method' => $request->payment_method,
             'check_number' => $request->check_number,
             'online_image' => $onlineImagePath,
-            'date' => now(), // you can replace with $request->date if needed
+            'date' => now(), // Or $request->date if user selects
         ]);
 
-        if ($request->payment_method === 'cash') {
-            $cashCounter = CashCounter::first();
+        // ✅ Branch-wise Cash Counter Update
+        if ($request->payment_method === 'cash' && $paidAmount > 0) {
+            $branchId = $site->branch_id;
+
+            $cashCounter = CashCounter::where('branch_id', $branchId)->first();
+
             if ($cashCounter) {
                 $cashCounter->opening_amount = ($cashCounter->opening_amount ?? 0) + $paidAmount;
-                $cashCounter->due_amount = ($cashCounter->due_amount ?? 0) + $paidAmount;
+                $cashCounter->due_amount     = ($cashCounter->due_amount ?? 0) + $paidAmount;
                 $cashCounter->save();
             } else {
                 CashCounter::create([
+                    'branch_id'      => $branchId,
                     'opening_amount' => $paidAmount,
                     'due_amount'     => $paidAmount,
                 ]);
             }
         }
+
         return redirect()->back()->with('success', 'Site created successfully!');
     }
+
 
 
 

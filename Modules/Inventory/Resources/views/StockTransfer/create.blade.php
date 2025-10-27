@@ -23,7 +23,7 @@
                             <div class="col-lg-4">
                                 <label class="form-label12 fw-semibold">From Branch</label>
 
-                                @if (auth()->user()->name === 'Super Admin')
+                                 @if (auth()->user()->access_type == 'Super Admin')
                                     <!-- ✅ Super Admin: Dropdown -->
                                     <select class="form-control border-primary shadow-sm" id="fromBranch"
                                         name="from_branch_id" required>

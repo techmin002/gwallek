@@ -47,4 +47,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/orders/tracking/search', [PurcheshController::class, 'trackingSearch'])->name('orders.tracking.search');
     Route::get('rejected', [PurcheshController::class, 'rejected'])->name('orders.rejected');
     Route::get('completed', [PurcheshController::class, 'completed'])->name('orders.completed');
+    Route::get('return', [PurcheshController::class, 'return'])->name('orders.return');
+    Route::post('return/store', [PurcheshController::class, 'returnstore'])->name('returns.store');
+    Route::get('returns/{id}', [PurcheshController::class, 'returndetails'])->name('returns.details');
+    Route::get('returns/destroy/{id}', [PurcheshController::class, 'returndestroy'])->name('returns.destroy');
+    Route::put('returns/update/{id}', [PurcheshController::class, 'returnupdate'])->name('returns.update');
+
 });
