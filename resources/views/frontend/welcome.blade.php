@@ -265,13 +265,13 @@
                             <span class="title-decoration"></span>
                             Message from Leadership
                         </h3>
-                      <blockquote class="message-quote">
-    <p class="quote-text">
-        <span class="quote-start"><i class="fas fa-quote-left"></i></span>
-        {!! $messages->description !!}
-        <span class="quote-end"><i class="fas fa-quote-right"></i></span>
-    </p>
-</blockquote>
+                        <blockquote class="message-quote">
+                            <p class="quote-text">
+                                <span class="quote-start"><i class="fas fa-quote-left"></i></span>
+                                {!! $messages->description !!}
+                                <span class="quote-end"><i class="fas fa-quote-right"></i></span>
+                            </p>
+                        </blockquote>
                         <div class="director-info mt-4">
                             <h5 class="mb-0">{{ $messages->name }}</h5>
                             <p class="text-secondary-custom mb-0">{{ $messages->role }}</p>
@@ -378,7 +378,8 @@
                                 <h4 class="text-primary-custom mb-3">{!! $service->name ?? '-' !!}</h4>
                                 <p class="mb-4">{!! $service->description ?? '-' !!}</p>
                                 <div class="service-btn-wrapper">
-                                    <a href="{{ route('frontend.service',$service->id) }}" class="btn btn-outline-primary-custom stretched-link">Learn
+                                    <a href="{{ route('frontend.service', $service->id) }}"
+                                        class="btn btn-outline-primary-custom stretched-link">Learn
                                         More</a>
                                 </div>
                             </div>
@@ -1032,7 +1033,7 @@
                             <div class="col-lg-6">
                                 <div class="contact-form-wrapper p-4 h-100">
                                     <h4 class="fw-bold mb-4 text-center text-contact">Send a Message</h4>
-                                    <form action="{{ route('messages.store') }}" method="POST" novalidate>
+                                    <form id="gnsQuoteForm" action="{{ route('inquiry.store') }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="branch_id" value="{{ $branch->id }}">
                                         <div class="row">
@@ -1063,8 +1064,8 @@
                                             <div class="invalid-feedback">Please enter your message.</div>
                                         </div>
                                         <div class="text-center">
-                                            <button type="submit" class="btn btn-primary-gradient btn-lg px-4">
-                                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                                            <button type="submit" class="btn btn-block gns-submit-btn">
+                                                Get Quote <i class="fas fa-arrow-right ms-2"></i>
                                             </button>
                                         </div>
                                     </form>

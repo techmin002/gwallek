@@ -8,7 +8,7 @@
         <!-- Page Header -->
         <section class="content-header">
             <div class="container-fluid">
-                <h1>{{ $site->title }} - Payment Details</h1>
+                <h1>{{ $site->name ?? 'N/A' }} - Payment Details</h1>
             </div>
         </section>
 
@@ -183,7 +183,7 @@
                         </table>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ route('sites.index') }}" class="btn btn-secondary">
+                        <a href="{{ url()->previous() }}" class="btn btn-secondary">
                             Back
                         </a>
                     </div>

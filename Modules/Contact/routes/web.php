@@ -20,7 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('blogs/comments/{comment}/reject', [BlogCommentController::class, 'reject'])->name('blogscomment.reject');
 });
 Route::post('messages/store', [ContactController::class, 'store'])->name('messages.store');
-Route::post('inquiry/store', [InquiryController::class, 'store'])->name('inquiry.store');
+Route::post('inquiry/store', [InquiryController::class, 'storeinquiry'])->name('inquiry.store');
 
 Route::get('messages/ed/index', [ContactController::class, 'messagefromed'])->name('messages.ed.index');
 Route::get('messages/md/index', [ContactController::class, 'messagefrommd'])->name('messages.md.index');

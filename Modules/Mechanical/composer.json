@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/mechanical",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Mechanical\\": "app/",
+            "Modules\\Mechanical\\Database\\Factories\\": "database/factories/",
+            "Modules\\Mechanical\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Mechanical\\Tests\\": "tests/"
+        }
+    }
+}

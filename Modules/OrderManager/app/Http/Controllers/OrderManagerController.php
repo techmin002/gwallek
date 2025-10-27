@@ -17,22 +17,49 @@ class OrderManagerController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
 
-        $orders = Order::with('project.branch')->orderBy('id', 'desc')->get();
+        if ($user->access_type == 'Super Admin') {
+            $orders = Order::with('project.branch')
+                ->orderBy('id', 'desc')
+                ->get();
+        } else {
+            $orders = Order::whereHas('project', function ($q) use ($user) {
+                $q->where('branch_id', $user->branch_id);
+            })
+                ->with('project.branch')
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
         return view('ordermanager::orders.index', compact('orders'));
     }
 
+
     public function create()
     {
-        // Preload first 20 projects & products
-        $projects = Site::where('status', 'on')->orderBy('name')->get();
+        $user = auth()->user();
+
         $products = Product::with('unit')
             ->where('status', 'on')
             ->orderBy('name')
             ->get();
 
+        if ($user->access_type == 'Super Admin') {
+            $projects = Site::where('status', 'on')
+                ->orderBy('name')
+                ->get();
+        } else {
+            $projects = Site::where('status', 'on')
+                ->where('branch_id', $user->branch_id)
+                ->orderBy('name')
+                ->get();
+        }
+
         return view('ordermanager::orders.create', compact('projects', 'products'));
     }
+
+
 
     public function store(Request $request)
     {
@@ -135,7 +162,6 @@ class OrderManagerController extends Controller
 
     public function history(Request $request, $id)
     {
-        // dd('hello');
         $request->validate([
             'status' => 'required|string',
             'message' => 'nullable|string',
@@ -152,9 +178,12 @@ class OrderManagerController extends Controller
             $oldStatus = $order->status;
             $newStatus = $request->status;
 
-
+            // 🔹 Pending → Accept
             if ($oldStatus === 'pending' && $newStatus === 'accept') {
-                // dd('accept');
+            }
+
+            // 🔹 Accept → Dispatch
+            if ($oldStatus === 'accept' && $newStatus === 'onloading') {
                 foreach ($request->products as $item) {
                     $inventory = Inventory::where('branch_id', $request->branch_id)
                         ->where('product_id', $item['product_id'])
@@ -164,25 +193,11 @@ class OrderManagerController extends Controller
                     $branchName = Branch::find($request->branch_id)->name ?? 'Unknown Branch';
 
                     if (!$inventory || $inventory->quantity < $item['quantity']) {
-                        return back()->withErrors([
-                            "Not enough stock for {$productName} in branch {$branchName}"
-                        ])->withInput();
+                        throw new \Exception("Not enough stock for {$productName} in branch {$branchName}");
                     }
 
+                    // ✅ Stock reduce
                     $inventory->decrement('quantity', $item['quantity']);
-                }
-            }
-
-            if ($oldStatus === 'accept' && $newStatus === 'reject') {
-                // dd('reject');
-                foreach ($request->products as $item) {
-                    $inventory = Inventory::where('branch_id', $request->branch_id)
-                        ->where('product_id', $item['product_id'])
-                        ->first();
-
-                    if ($inventory) {
-                        $inventory->increment('quantity', $item['quantity']);
-                    }
                 }
             }
 
@@ -194,14 +209,15 @@ class OrderManagerController extends Controller
             // ✅ Save in history
             OrderHistory::create([
                 'order_id' => $id,
-                'status' => $newStatus,
-                'date' => $request->action_date,
-                'message' => $request->message,
+                'status'   => $newStatus,
+                'date'     => $request->action_date,
+                'message'  => $request->message,
             ]);
         });
 
         return redirect()->back()->with('success', 'Order status updated successfully.');
     }
+
 
 
 

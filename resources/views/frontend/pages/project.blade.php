@@ -1,4 +1,3 @@
-
 @extends('frontend.layouts.master')
 @section('title', 'Gwallek Nirman Sewa')
 @section('content')
@@ -366,31 +365,32 @@
     </section>
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const filterButtons = document.querySelectorAll(".project-filters .nav-link");
-    const projects = document.querySelectorAll(".project-item");
+        document.addEventListener("DOMContentLoaded", function() {
+            const filterButtons = document.querySelectorAll(".project-filters .nav-link");
+            const projects = document.querySelectorAll(".project-item");
 
-    filterButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            // 1️⃣ Active class update
-            filterButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
+            filterButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    // 1️⃣ Active class update
+                    filterButtons.forEach(btn => btn.classList.remove("active"));
+                    this.classList.add("active");
 
-            // 2️⃣ Filter key
-            const target = this.id.replace("-tab", ""); // ongoing, completed, hydropower, road, building, all
+                    // 2️⃣ Filter key
+                    const target = this.id.replace("-tab",
+                    ""); // ongoing, completed, hydropower, road, building, all
 
-            // 3️⃣ Show / hide projects
-            projects.forEach(project => {
-                const categories = project.getAttribute("data-category").split(" ");
-                if (target === "all" || categories.includes(target)) {
-                    project.style.display = "block"; // show
-                } else {
-                    project.style.display = "none"; // hide
-                }
+                    // 3️⃣ Show / hide projects
+                    projects.forEach(project => {
+                        const categories = project.getAttribute("data-category").split(" ");
+                        if (target === "all" || categories.includes(target)) {
+                            project.style.display = "block"; // show
+                        } else {
+                            project.style.display = "none"; // hide
+                        }
+                    });
+                });
             });
         });
-    });
-});
-</script>
+    </script>
 
 @endsection

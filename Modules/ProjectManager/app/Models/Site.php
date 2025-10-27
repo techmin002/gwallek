@@ -81,4 +81,9 @@ class Site extends Model
     {
         return $this->hasMany(SitePaymentDetails::class, 'site_id');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(\Modules\OrderManager\Models\Order::class, 'project_id');
+    }
 }

@@ -68,7 +68,7 @@
                                                         <img src="{{ asset('upload/images/services/' . $service->icon) }}"
                                                             width="120px" alt="{{ $service->title }}">
                                                     @else
-                                                        <span class="text-muted">No Image</span>
+                                                        <span class="text-muted">No Icon</span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center">

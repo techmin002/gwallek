@@ -27,6 +27,18 @@
             </div><!-- /.container-fluid -->
         </section>
 
+        <!-- Branch Switch Buttons -->
+        @if (auth()->user()->access_type === 'Super Admin')
+            <div class="container-fluid mb-3">
+                @foreach ($branches as $branch)
+                    <a href="{{ route('cash-counter.index', ['branch_id' => $branch->id]) }}"
+                        class="btn btn-sm me-2 {{ $branchId == $branch->id ? 'btn-success' : 'btn-primary' }}">
+                        {{ $branch->name }}
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
         <!-- Main content -->
         <section class="content">
             <div class="container-fluid">
@@ -34,20 +46,12 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h3 class="card-title float-left">
-                                {{-- <a href="{{ route('finance.cashdetails') }}" class="btn btn-info text-white">Cash
-                                            Details
-                                        </a> --}}
-                                {{-- <a href="{{ route('expense.cashdetails') }}" class="btn btn-info text-white">
-                                            Expense Details
-                                        </a> --}}
+                                {{-- Extra buttons agar chahiye toh yaha add kar sakte ho --}}
                             </h3>
                         </div>
                         <div class="col-md-6">
                             <h3 class="card-title float-right">
                                 <!-- Deposit Button -->
-                                {{-- <a href="{{ route('finance.depositedetails') }}" class="btn btn-info text-white">
-                                    Deposit Details
-                                </a> --}}
                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                     data-target="#depositModal">
                                     Deposit
@@ -76,38 +80,41 @@
                                                             class="form-control" value="{{ old('amount') }}" min="1"
                                                             max="{{ $counter->due_amount ?? '' }}" required>
                                                         <small class="text-muted">Maximum payable:
-                                                            {{ $counter->due_amount ?? '' }}</small>
+                                                            {{ $counter->due_amount ?? '0' }}</small>
                                                         <p id="amount_error" style="color:red; margin-top:5px;"></p>
                                                         @error('amount')
                                                             <p style="color:red">{{ $message }}</p>
                                                         @enderror
                                                     </div>
-                                                    <!-- Payment Method -->
+
                                                     <!-- Branch -->
                                                     @if (auth()->user()->access_type === 'Super Admin')
                                                         <div class="form-group">
-                                                            <label>Select Branch</label>
-                                                            <select name="branch_id" id="branch_id" class="form-control"
-                                                                required>
-                                                                <option value="" selected disabled>-- Select
-                                                                    Branch --</option>
+                                                            <label>Branch</label>
+                                                            <select class="form-control" disabled>
                                                                 @foreach ($branches as $branch)
-                                                                    <option value="{{ $branch->id }}">
-                                                                        {{ $branch->name }}</option>
+                                                                    <option value="{{ $branch->id }}"
+                                                                        {{ $branchId == $branch->id ? 'selected' : '' }}>
+                                                                        {{ $branch->name }}
+                                                                    </option>
                                                                 @endforeach
                                                             </select>
+                                                            <!-- hidden input for submit -->
+                                                            <input type="hidden" name="branch_id"
+                                                                value="{{ $branchId }}">
                                                         </div>
                                                     @else
                                                         <input type="hidden" name="branch_id"
                                                             value="{{ auth()->user()->branch_id }}">
                                                     @endif
 
+
                                                     <!-- Bank -->
                                                     <div class="form-group">
                                                         <label>Select Bank</label>
                                                         <select name="bank_id" id="bank_id" class="form-control" required>
-                                                            <option value="" selected disabled>-- Select Bank
-                                                                --</option>
+                                                            <option value="" selected disabled>-- Select Bank --
+                                                            </option>
                                                             @foreach ($banks as $bank)
                                                                 <option value="{{ $bank->id }}">
                                                                     {{ $bank->bank_name }}</option>
@@ -149,25 +156,27 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Your same cards + tables code below (unchanged) --}}
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <div class="card bg-info text-white">
                             <div class="card-body">
-                                <h4>Total Opening Amount: {{ number_format($counter->opening_amount, 2) }}</h4>
+                                <h4>Total Opening Amount: {{ number_format($counter->opening_amount ?? 0, 2) }}</h4>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card bg-success text-white">
                             <div class="card-body">
-                                <h4>Total Reduce Amount: {{ number_format($counter->reduce_amount, 2) }}</h4>
+                                <h4>Total Reduce Amount: {{ number_format($counter->reduce_amount ?? 0, 2) }}</h4>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card bg-danger text-white">
                             <div class="card-body">
-                                <h4>Total Remaining Amount: {{ number_format($counter->due_amount, 2) }}</h4>
+                                <h4>Total Remaining Amount: {{ number_format($counter->due_amount ?? 0, 2) }}</h4>
                             </div>
                         </div>
                     </div>
@@ -288,11 +297,11 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </section>
         <!-- /.content -->
     </div>
+
     <script>
         $('#branch_id').change(function() {
             let branchId = $(this).val();

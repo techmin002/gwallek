@@ -37,6 +37,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="row">
+                            <!-- Employee Salary -->
                             <div class="col-xl-6">
                                 <div class="card set-card ">
                                     <div class="card-header">
@@ -147,11 +148,11 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="project-info d-flex text-sm">
-                                            <div class="project-info-inner mr-3 col-11">
+                                            <div class="project-info-inner mr-3 col-10">
                                                 <b class="m-0"> Payslip Type </b>
                                                 <div class="project-amnt pt-1">Monthly Payslip</div>
                                             </div>
-                                            <div class="project-info-inner mr-3 col-1">
+                                            <div class="project-info-inner mr-3 col-2">
                                                 <b class="m-0"> Salary </b>
                                                 <div class="project-amnt pt-1">Rs. {{ $salary->salary ?? '0' }}</div>
                                             </div>
@@ -853,7 +854,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Service Maintainance-->
+                            {{-- <!-- Service Maintainance-->
                             <div class="col-md-6">
                                 <div class="card set-card">
                                     <div class="card-header">
@@ -1015,8 +1016,8 @@
                                                                                         <input type="number" name="amount"
                                                                                             class="form-control" id="" value="{{ $service->amount }}" placeholder="Service Incentive">
                                                                                     </div>
-                
-                                                                                    
+
+
                                                                                     <div class="input-group mb-3">
                                                                                         <div class="input-group-prepend">
                                                                                             <span class="input-group-text"
@@ -1028,7 +1029,7 @@
                                                                                             placeholder="Enter date here"
                                                                                             aria-label="date"
                                                                                             aria-describedby="basic-addon1" value="{{ $service->date }}" required>
-                
+
                                                                                     </div>
                                                                                     <div class="input-group mb-3">
                                                                                         <div class="input-group-prepend">
@@ -1037,7 +1038,7 @@
                                                                                             </span>
                                                                                         </div>
                                                                                         <textarea name="description" id="" class="form-control" rows="3">{{ $service->title }}</textarea>
-                
+
                                                                                     </div>
 
                                                                                 </div>
@@ -1201,7 +1202,7 @@
                                                                                             id="">
                                                                                     </div>
 
-                                                                                    
+
                                                                                     <div class="input-group mb-3">
                                                                                         <div class="input-group-prepend">
                                                                                             <span class="input-group-text"
@@ -1241,7 +1242,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>

@@ -23,10 +23,10 @@
                         <td>Sale Insentive</td>
                         <td>{{ number_format($payslip->sales_insentive, 2) }}</td>
                     </tr>
-                    <tr>
+                    {{-- <tr>
                         <td>Service Insentive</td>
                         <td>{{ number_format($payslip->service_insentive, 2) }}</td>
-                    </tr>
+                    </tr> --}}
                 </table>
                 <table class="table table-md">
                     <tr>
@@ -36,18 +36,18 @@
                     <tr>
                         <td>Advanced Pay</td>
                         <td>{{ number_format($payslip->advance_pay, 2) }}</td>
-                        
+
                     </tr>
-                    <tr>
+                    {{-- <tr>
                         <td>Classic Fund</td>
                             <td>{{ number_format($payslip->fund, 2) }}</td>
-                    </tr>
+                    </tr> --}}
                     <!-- Add more deduction rows -->
                 </table>
             </div>
             @php
-                $totalEarning = $payslip->salary + $payslip->allowance + $payslip->service_insentive + $payslip->sales_insentive;
-                $totalDeduction = $payslip->advance_pay + $payslip->fund
+                $totalEarning = $payslip->salary + $payslip->allowance  + $payslip->sales_insentive;
+                $totalDeduction = $payslip->advance_pay
             @endphp
 
             <div class="card-body">

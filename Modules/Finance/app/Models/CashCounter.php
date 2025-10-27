@@ -14,6 +14,7 @@ class CashCounter extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        'branch_id',
         'opening_amount',
         'reduce_amount',
         'due_amount',

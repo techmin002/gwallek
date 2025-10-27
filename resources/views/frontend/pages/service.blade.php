@@ -96,8 +96,8 @@
                     <div class="col-lg-4 col-md-6 project-item">
                         <div class="project-card">
                             <div class="project-image">
-                                <img src="{{ asset('upload/images/servicestype/' . $service->image) }}" alt="{{ $service->name }}"
-                                    class="img-fluid">
+                                <img src="{{ asset('upload/images/servicestype/' . $service->image) }}"
+                                    alt="{{ $service->name }}" class="img-fluid">
                             </div>
                             <div class="project-overlay">
                                 <div class="project-content">

@@ -83,8 +83,7 @@ class ExpensesController extends Controller
             $request->receipt->move(public_path('upload/images/expenses-receipt'), $image);
         }
 
-        $branchId = $request->branchId;
-
+        $branchId = $request->branchId ?? auth()->user()->branch_id;
 
         // Save the expense
         $expense = new Expenses();
@@ -101,13 +100,14 @@ class ExpensesController extends Controller
         $expense->receipt = $image;
         $expense->save();
 
-
         if (in_array($request->mode, ['cheque', 'online'])) {
-            // Bank logic
-            $bank = Bank::find($request->bank_id);
+            // 🟢 Bank logic
+            $bank = Bank::where('id', $request->bank_id)
+                ->where('branch_id', $branchId)
+                ->first();
 
             if (!$bank) {
-                return back()->with('error', 'Selected bank not found!');
+                return back()->with('error', 'Selected bank not found for this branch!');
             }
 
             if ((float)$request->amount > (float)$bank->closing_amount) {
@@ -121,10 +121,11 @@ class ExpensesController extends Controller
             $bank->closing_amount = $after;
             $bank->save();
         } elseif ($request->mode === 'cash') {
-            $cashCounter = CashCounter::first();
+            // 🟢 Cash Counter branch specific
+            $cashCounter = CashCounter::where('branch_id', $branchId)->first();
 
             if (!$cashCounter) {
-                return back()->with('error', 'Cash counter not found!');
+                return back()->with('error', 'Cash counter not found for this branch!');
             }
 
             if ($request->amount > (float)$cashCounter->due_amount) {
@@ -133,12 +134,13 @@ class ExpensesController extends Controller
 
             // Update due_amount and reduce_amount
             $cashCounter->due_amount    -= $request->amount;
-            $cashCounter->reduce_amount += $request->amount;
+            $cashCounter->reduce_amount = ($cashCounter->reduce_amount ?? 0) + $request->amount;
             $cashCounter->save();
         }
 
         return back()->with('success', 'Expense Added Successfully');
     }
+
 
 
 
@@ -174,9 +176,6 @@ class ExpensesController extends Controller
     {
         $expense = Expenses::findOrFail($id);
 
-
-        // $bankId = in_array($request->mode, ['online', 'cheque']) ? $request->bank_id : null;
-        //  dd($bankId);
         // Handle receipt upload
         $image = $expense->receipt;
         if ($request->hasFile('receipt')) {
@@ -184,73 +183,76 @@ class ExpensesController extends Controller
             $request->receipt->move(public_path('upload/images/expenses-receipt'), $image);
         }
 
-        $branchId = $request->branchId;
+        $branchId = $request->branchId ?? $expense->branch_id;
 
-        // ✅ If mode changed from bank/cash → restore old balance first
+        // 🔄 Restore old balance first (before updating new values)
         if (in_array($expense->mode, ['cheque', 'online'])) {
-            $oldBank = Bank::find($expense->bank_id);
+            $oldBank = Bank::where('id', $expense->bank_id)
+                ->where('branch_id', $expense->branch_id)
+                ->first();
+
             if ($oldBank) {
                 $oldBank->closing_amount += (float)$expense->amount;
                 $oldBank->save();
             }
         } elseif ($expense->mode === 'cash') {
-            $cashCounter = CashCounter::first();
+            $cashCounter = CashCounter::where('branch_id', $expense->branch_id)->first();
             if ($cashCounter) {
                 $cashCounter->due_amount    += (float)$expense->amount;
-                $cashCounter->reduce_amount -= (float)$expense->amount;
+                $cashCounter->reduce_amount = max(0, ($cashCounter->reduce_amount ?? 0) - (float)$expense->amount);
                 $cashCounter->save();
             }
         }
 
-
+        // ✅ Update expense fields
         $bankId = in_array($request->mode, ['online', 'cheque']) ? $request->bank_id : null;
-        // ✅ Update expense
+
         $expense->update([
             'expense_category_id' => $request->categoryId,
-            'title' => $request->title,
-            'amount' => $request->amount,
-            'bank_id' => $bankId,
-            'branch_id' => $branchId,
-            'created_by' => auth()->user()->id,
-            'date' => $request->date,
-            'mode' => $request->mode,
+            'title'       => $request->title,
+            'amount'      => $request->amount,
+            'bank_id'     => $bankId,
+            'branch_id'   => $branchId,
+            'created_by'  => auth()->user()->id,
+            'date'        => $request->date,
+            'mode'        => $request->mode,
             'description' => $request->description,
-            'status' => 'on',
-            'receipt' => $image,
+            'status'      => 'on',
+            'receipt'     => $image,
         ]);
 
-        // ✅ Apply new balance changes
+        // ✅ Apply new balance changes (after update)
         if (in_array($request->mode, ['cheque', 'online'])) {
-            $bank = Bank::find($request->bank_id);
+            $bank = Bank::where('id', $request->bank_id)
+                ->where('branch_id', $branchId)
+                ->first();
+
             if (!$bank) {
-                return back()->with('error', 'Selected bank not found!');
+                return back()->with('error', 'Selected bank not found for this branch!');
             }
             if ((float)$request->amount > (float)$bank->closing_amount) {
                 return back()->with('error', 'Not enough balance in the selected bank!');
             }
+
             $bank->closing_amount -= (float)$request->amount;
             $bank->save();
         } elseif ($request->mode === 'cash') {
-            $cashCounter = CashCounter::first();
+            $cashCounter = CashCounter::where('branch_id', $branchId)->first();
+
             if (!$cashCounter) {
-                return back()->with('error', 'Cash counter not found!');
+                return back()->with('error', 'Cash counter not found for this branch!');
             }
             if ($request->amount > (float)$cashCounter->due_amount) {
                 return back()->with('error', 'Insufficient cash in counter!');
             }
-            $cashCounter->due_amount    -= $request->amount;
-            $cashCounter->reduce_amount += $request->amount;
+
+            $cashCounter->due_amount    -= (float)$request->amount;
+            $cashCounter->reduce_amount = ($cashCounter->reduce_amount ?? 0) + (float)$request->amount;
             $cashCounter->save();
         }
 
         return back()->with('success', 'Expense Updated Successfully');
     }
-
-
-
-
-
-
 
 
 

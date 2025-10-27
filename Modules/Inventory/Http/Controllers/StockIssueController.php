@@ -21,20 +21,20 @@ class StockIssueController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $machineries = Machinery::select('id', 'name')->get();
-        $accessories = Accessory::select('id', 'name')->get();
-        $technicalTools = TechnicalTools::select('id', 'tool_name as name')->get();
+    // public function index()
+    // {
+    //     $machineries = Machinery::select('id', 'name')->get();
+    //     $accessories = Accessory::select('id', 'name')->get();
+    //     $technicalTools = TechnicalTools::select('id', 'tool_name as name')->get();
 
-        $stockIssues = StockIssue::with('user')->latest()->get();
-        return view('inventory::stockissue.index', compact(
-            'machineries',
-            'accessories',
-            'technicalTools',
-            'stockIssues'
-        ));
-    }
+    //     $stockIssues = StockIssue::with('user')->latest()->get();
+    //     return view('inventory::stockissue.index', compact(
+    //         'machineries',
+    //         'accessories',
+    //         'technicalTools',
+    //         'stockIssues'
+    //     ));
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -47,58 +47,58 @@ class StockIssueController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
+    // public function store(Request $request)
+    // {
 
 
-        // dd($request->all());
-        // 1. Create Stock Issue
-        $issue = StockIssue::create([
-            'message' => $request->message,
-            'requested_by' => auth()->id(),
-            'status' => 'pending'
-        ]);
+    //     // dd($request->all());
+    //     // 1. Create Stock Issue
+    //     $issue = StockIssue::create([
+    //         'message' => $request->message,
+    //         'requested_by' => auth()->id(),
+    //         'status' => 'pending'
+    //     ]);
 
-        // 2. Store Machineries
-        if ($request->has('machineries')) {
-            foreach ($request->machineries as $machinery) {
-                if (!empty($machinery['id']) && !empty($machinery['qty'])) {
-                    StockIssueMachinery::create([
-                        'stock_issue_id' => $issue->id,
-                        'machinery_id' => $machinery['id'],
-                        'quantity' => $machinery['qty'],
-                    ]);
-                }
-            }
-        }
-        // 3. Store Accessories
-        if ($request->accessories) {
-            foreach ($request->accessories as $accessory) {
-                if (!empty($accessory['id']) && !empty($accessory['qty'])) {
-                    StockIssueAccessory::create([
-                        'stock_issue_id' => $issue->id,
-                        'accessory_id' => $accessory['id'],
-                        'quantity' => $accessory['qty'],
-                    ]);
-                }
-            }
-        }
+    //     // 2. Store Machineries
+    //     if ($request->has('machineries')) {
+    //         foreach ($request->machineries as $machinery) {
+    //             if (!empty($machinery['id']) && !empty($machinery['qty'])) {
+    //                 StockIssueMachinery::create([
+    //                     'stock_issue_id' => $issue->id,
+    //                     'machinery_id' => $machinery['id'],
+    //                     'quantity' => $machinery['qty'],
+    //                 ]);
+    //             }
+    //         }
+    //     }
+    //     // 3. Store Accessories
+    //     if ($request->accessories) {
+    //         foreach ($request->accessories as $accessory) {
+    //             if (!empty($accessory['id']) && !empty($accessory['qty'])) {
+    //                 StockIssueAccessory::create([
+    //                     'stock_issue_id' => $issue->id,
+    //                     'accessory_id' => $accessory['id'],
+    //                     'quantity' => $accessory['qty'],
+    //                 ]);
+    //             }
+    //         }
+    //     }
 
 
-        // 4. Store Technical Tools
-        if ($request->has('technical_tools')) {
-            foreach ($request->technical_tools as $tool) {
-                if (!empty($tool['id']) && !empty($tool['qty'])) {
-                    StockIssueTechnicalTool::create([
-                        'stock_issue_id' => $issue->id,
-                        'technical_tool_id' => $tool['id'],
-                        'quantity' => $tool['qty'],
-                    ]);
-                }
-            }
-        }
-        return back()->with('success', 'Stock Issue Request Created Successfully');
-    }
+    //     // 4. Store Technical Tools
+    //     if ($request->has('technical_tools')) {
+    //         foreach ($request->technical_tools as $tool) {
+    //             if (!empty($tool['id']) && !empty($tool['qty'])) {
+    //                 StockIssueTechnicalTool::create([
+    //                     'stock_issue_id' => $issue->id,
+    //                     'technical_tool_id' => $tool['id'],
+    //                     'quantity' => $tool['qty'],
+    //                 ]);
+    //             }
+    //         }
+    //     }
+    //     return back()->with('success', 'Stock Issue Request Created Successfully');
+    // }
 
     /**
      * Show the specified resource.

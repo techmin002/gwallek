@@ -277,7 +277,7 @@ class PayrollController extends Controller
         $fund->delete();
         return back()->with('success', 'Fund Deleted Successfully');
     }
-    // employee service insentive 
+    // employee service insentive
     public function storeEmployeeservice(Request $request)
     {
         // dd($request->all());
@@ -335,44 +335,52 @@ class PayrollController extends Controller
         $request->validate([
             'month' => ['required'],
         ]);
+
         $emp = EmployeeSalary::pluck('employee_id');
+
         foreach ($emp as $employeeId) {
             $employee = Employee::where('id', $employeeId)
-                ->with('salary', 'allowance', 'insentive', 'advancePay', 'fund', 'service')
+                ->with('salary', 'allowance', 'insentive', 'advancePay')
                 ->first();
 
-            $salary =  EmployeeSalary::select('salary')->where('employee_id', $employeeId)->first();
-            $salary = $salary->salary;
-            $fund = EmployeeFund::select('amount')->where('employee_id', $employeeId)->first();
-            $fund = $fund->amount ?? 1000;
+            // Salary
+            $salary = EmployeeSalary::where('employee_id', $employeeId)->value('salary') ?? 0;
+
+            // Allowances
             $allowance = EmployeeAllowance::where('employee_id', $employeeId)->sum('amount');
+
+            // Sales Incentives
             $sale_insentive = EmployeeSaleInsentive::where('employee_id', $employeeId)->sum('insentive_amount');
-            $service_insentive = EmployeeService::where('employee_id', $employeeId)->sum('amount');
+
+            // Advance Pay
             $advancedPay = EmployeeAdvancePay::where('employee_id', $employeeId)->sum('amount');
+
+            // Mark as paid
             EmployeeAllowance::where('employee_id', $employeeId)->update(['status' => 'paid']);
             EmployeeSaleInsentive::where('employee_id', $employeeId)->update(['status' => 'paid']);
-            $fund = EmployeeFund::where('employee_id', $employeeId)->update(['status' => 'paid']);
-            EmployeeService::where('employee_id', $employeeId)->update(['status' => 'paid']);
             EmployeeAdvancePay::where('employee_id', $employeeId)->update(['status' => 'paid']);
-            $net_salary = $salary + $allowance + $sale_insentive + $service_insentive - $fund - $advancedPay;
 
-            $empamount = EmployeePayslip::create([
-                'salary' => $salary,
-                'net_salary' => $net_salary,
-                'fund' => $fund,
-                'sales_insentive' => $sale_insentive,
-                'service_insentive' => $service_insentive,
-                'advance_pay' => $advancedPay,
-                'allowance' => $allowance,
-                'month' => $request['month'],
-                'employee_id' => $employeeId,
-                'status' => 'unpaid',
-                'created_by' => auth()->user()->id,
+            // Net Salary (service aur fund remove kar diya)
+            $net_salary = $salary + $allowance + $sale_insentive - $advancedPay;
+
+            // Create Payslip
+            EmployeePayslip::create([
+                'salary'            => $salary,
+                'net_salary'        => $net_salary,
+                'sales_insentive'   => $sale_insentive,
+                'advance_pay'       => $advancedPay,
+                'allowance'         => $allowance,
+                'month'             => $request['month'],
+                'employee_id'       => $employeeId,
+                'status'            => 'unpaid',
+                'created_by'        => auth()->user()->id,
             ]);
         }
+
         $message = $request['month'] . ' Payslip Generated Successfully';
         return back()->with('success', $message);
     }
+
     public function fetchPayslip(Request $request)
     {
         $month = $request->input('month');
@@ -439,20 +447,19 @@ class PayrollController extends Controller
         return response()->json(['success' => false, 'message' => 'Payslip not found']);
     }
     public function viewPayslip(Request $request)
-{
-    $payslipId = $request->input('id');
+    {
+        $payslipId = $request->input('id');
 
-    // Fetch payslip data
-    $payslip = EmployeePayslip::find($payslipId);
+        // Fetch payslip data
+        $payslip = EmployeePayslip::find($payslipId);
 
-    if ($payslip) {
-        // You can customize this view (create a separate blade for it)
-        $html = view('employee::payslip.view', compact('payslip'))->render();
+        if ($payslip) {
+            // You can customize this view (create a separate blade for it)
+            $html = view('employee::payslip.view', compact('payslip'))->render();
 
-        return response()->json(['success' => true, 'html' => $html]);
+            return response()->json(['success' => true, 'html' => $html]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Payslip not found']);
     }
-
-    return response()->json(['success' => false, 'message' => 'Payslip not found']);
-}
-
 }

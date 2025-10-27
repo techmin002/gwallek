@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('cash_counters', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('branch_id');
             $table->decimal('opening_amount', 15, 2)->default(0);
             $table->decimal('reduce_amount', 15, 2)->default(0);
             $table->decimal('due_amount', 15, 2)->default(0);
             $table->timestamps();
+
+            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
         });
     }
 
