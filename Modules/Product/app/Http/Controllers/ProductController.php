@@ -19,11 +19,19 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::with(['brand', 'unit', 'category', 'branch'])->get();
+        if (auth()->user()->name == 'Super Admin') {
+            $products = Product::with(['brand', 'unit', 'category', 'branch'])->get();
+            $branches = Branch::all();
+        } else {
+            $products = Product::with(['brand', 'unit', 'category', 'branch'])
+                ->where('branch_id', auth()->user()->branch_id)
+                ->get();
+            $branches = Branch::where('id', auth()->user()->branch_id)->get();
+        }
+
         $units = Unit::all();
         $brands = Brand::all();
         $categories = Categories::all();
-        $branches = Branch::all();
 
         return view('product::products.index', compact('products', 'units', 'brands', 'categories', 'branches'));
     }
@@ -61,7 +69,7 @@ class ProductController extends Controller
             $product->category_id = $request->category_id;
             $product->brand_id = $request->brand_id;
             $product->unit_id = $request->unit_id;
-            $product->branch_id = $request->branch_id;
+            $product->branch_id = $request->branch_id ?? auth()->user()->branch_id;
             $product->price = $request->price;
             $product->stock = $request->stock;
             $product->description = $request->description;
@@ -136,7 +144,7 @@ class ProductController extends Controller
         $product->slug = \Illuminate\Support\Str::slug($request->name);
         $product->price = $request->price;
         $product->brand_id = $request->brand_id;
-        $product->branch_id = $request->branch_id;
+        $product->branch_id = $request->branch_id ?? auth()->user()->branch_id;
         $product->category_id = $request->category_id;
         $product->unit_id = $request->unit_id;
         $product->description = $request->description;

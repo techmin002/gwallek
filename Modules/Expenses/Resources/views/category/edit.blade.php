@@ -14,36 +14,39 @@
 
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                <label class="form-label12">Title</label>
-                                <input class="form-control" placeholder="Enter Vendor Name" value="{{ $exp->title }}" type="text"
-                                    name="title" id="vendor">
+                                    <label class="form-label12">Title</label>
+                                    <input class="form-control" placeholder="Enter Vendor Name" value="{{ $exp->title }}" type="text"
+                                        name="title" id="vendor">
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                <label class="form-label12">image</label>
-                                <input class="form-control" placeholder="Enter Title" type="file" name="image"
-                                    id="image">
+                                    <label class="form-label12">image</label>
+                                    <input class="form-control" placeholder="Enter Title" type="file" name="image"
+                                        id="image">
                                     <img src="{{  asset('upload/images/expenses-category/'.$exp->image)  }}" height="100px" alt="">
                                 </div>
                             </div>
-                            
+
+                            @if (auth()->user()->name == 'Super Admin')
                             <div class="col-lg-12" data-select2-id="select2-data-5-a5wr">
                                 <div class="form-group">
-                                <label class="form-label12">Branch </label>
-                                <select class="form-control" name="branch_id">
-                                    <option value="" selected disabled>Select Branch</option>
-                                    @foreach ($branches as $branch)
+                                    <label class="form-label12">Branch </label>
+                                    <select class="form-control" name="branch_id">
+                                        <option value="" selected disabled>Select Branch</option>
+                                        @foreach ($branches as $branch)
                                         <option value="{{ $branch->id }}" @if($branch->id == $exp->branch_id) selected @endif>{{ $branch->name }}</option>
-                                    @endforeach
-                                </select>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
+                            @endif
+
                             <div class="col-md-12">
                                 <div class="form-group">
-                                <label class="form-label12">Description</label>
-                                <textarea name="description" id="" class="form-control">{{ $exp->description }}</textarea>
-                            </div>
+                                    <label class="form-label12">Description</label>
+                                    <textarea name="description" id="" class="form-control">{{ $exp->description }}</textarea>
+                                </div>
                             </div>
                             <div class="col-md-12 mt-2">
                                 <!-- Bootstrap Switch -->
@@ -52,8 +55,14 @@
                                         <h3 class="card-title">Publish</h3>
                                     </div>
                                     <div class="card-body">
-                                        <input type="checkbox" name="status" @if($branch->id == $exp->branch_id) checked @endif data-bootstrap-switch
-                                            data-off-color="danger" data-on-color="success">
+                                        {{-- Hidden input ensures a value is always sent --}}
+                                        <input type="hidden" name="status" value="off">
+
+                                        <input type="checkbox" name="status" value="on"
+                                            @if($exp->status == 'on') checked @endif
+                                        data-bootstrap-switch
+                                        data-off-color="danger"
+                                        data-on-color="success">
                                     </div>
                                 </div>
                             </div>
@@ -64,11 +73,11 @@
                 <div class="modal-footer justify-content-center">
 
                     <button type="submit" name="submit" id="btnSubmit" class="btn btn-success">Save Item</button>
-        
+
                     <button type="cancel" data-dismiss="modal" class="btn btn-danger">Cancel</button>
                 </div>
         </div>
-        
+
         </form>
         <span id="output"></span>
     </div>

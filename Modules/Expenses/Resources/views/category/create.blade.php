@@ -22,15 +22,17 @@
                                 <input class="form-control" type="file" name="image" id="image">
                             </div>
 
+                            @if (auth()->user()->name == 'Super Admin')
                             <div class="mt-3 col-lg-12">
                                 <label class="form-label12">Branch</label>
                                 <select class="form-control" name="branch_id">
                                     <option value="" selected disabled>Select Branch</option>
                                     @foreach ($branches as $branch)
-                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
+                            @endif
 
                             <div class="mt-3 col-md-12">
                                 <label class="form-label12">Description</label>

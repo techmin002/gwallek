@@ -1377,6 +1377,69 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {{-- Order permission --}}
+                                        <div class="col-lg-4 col-md-6 mb-3">
+                                            <div class="card h-100 border-0 shadow">
+                                                <div class="card-header">
+                                                    Order
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="access_orders" name="permissions[]"
+                                                                    value="access_orders"
+                                                                    {{ old('access_orders') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="access_orders">Access</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="show_orders" name="permissions[]"
+                                                                    value="show_orders"
+                                                                    {{ old('show_orders') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="show_orders">View</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="create_orders" name="permissions[]"
+                                                                    value="create_orders"
+                                                                    {{ old('create_orders') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="create_orders">Create</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="edit_orders" name="permissions[]"
+                                                                    value="edit_orders"
+                                                                    {{ old('edit_orders') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="edit_orders">Edit</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="delete_orders" name="permissions[]"
+                                                                    value="delete_orders"
+                                                                    {{ old('delete_orders') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="delete_orders">Delete</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
