@@ -120,19 +120,22 @@
                                         </div>
                                     </div>
                                     <div class="form-row">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label for="branch_id">Select Branch</label>
-                                                <select name="branch_id" id="branch_id" class="form-control" required>
-                                                    <option value="">-- Select Branch --</option>
-                                                    @foreach ($branches as $branch)
-                                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                                                    @endforeach
-                                                </select>
+                                        @if (auth()->user()->name === 'Super Admin')
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="branch_id">Select Branch</label>
+                                                    <select name="branch_id" id="branch_id" class="form-control"
+                                                        required>
+                                                        <option value="">-- Select Branch --</option>
+                                                        @foreach ($branches as $branch)
+                                                            <option value="{{ $branch->id }}">{{ $branch->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endif
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -205,4 +208,4 @@
             }
         }
     </script>
-@endsection  
+@endsection

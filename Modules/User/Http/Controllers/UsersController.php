@@ -5,6 +5,7 @@ namespace Modules\User\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Modules\Branch\Entities\Branch;
@@ -16,7 +17,13 @@ class UsersController extends Controller
     public function index()
     {
         abort_if(Gate::denies('access_user_management'), 403);
-        $users = User::latest()->get();
+
+        $user = Auth::user();
+
+        $users = User::query()
+            ->when($user->access_type !== 'Super Admin', fn($q) => $q->where('branch_id', $user->branch_id))
+            ->latest()
+            ->get();
 
         return view('user::users.index', compact("users"));
     }
@@ -40,9 +47,9 @@ class UsersController extends Controller
             'email'     => 'required|email|max:255|unique:users,email',
             'phone'     => 'nullable|string|max:20',
             'address'   => 'nullable|string|max:255',
-            'password'  => 'required|string|min:8|max:255|confirmed',
-            'branch_id' => 'required'
+            'password'  => 'required|string|min:8|max:255|confirmed'
         ]);
+        // dd('hello');
 
         $imageName = '';
         if ($request->image) {
@@ -55,7 +62,7 @@ class UsersController extends Controller
         $user = User::create([
             'name'        => $request->name,
             'email'       => $request->email,
-            'branch_id'   => $request->branch_id,
+            'branch_id'   => $request->branch_id ?? auth()->user()->branch_id ,
             'access_type' => $request->role,
             'password'    => Hash::make($request->password),
             'image'       => $imageName,

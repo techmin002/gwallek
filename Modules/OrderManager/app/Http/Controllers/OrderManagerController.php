@@ -10,6 +10,7 @@ use Modules\Inventory\Entities\Inventory;
 use Modules\OrderManager\Models\Order;
 use Modules\OrderManager\Models\OrderHistory;
 use Modules\OrderManager\Models\OrderItems;
+use Modules\OrderManager\Models\ProductItem;
 use Modules\Product\Models\Product;
 use Modules\ProjectManager\Models\Site;
 
@@ -61,39 +62,70 @@ class OrderManagerController extends Controller
 
 
 
-    public function store(Request $request)
-    {
-        // dd($request->all());
-        // Validate request
-        $request->validate([
-            'project_id' => 'required|exists:sites,id',
-            'products' => 'required|array|min:1',
-            'products.*.product_id' => 'required|exists:products,id',
-            'products.*.quantity' => 'required|integer|min:1',
-            // 'products.*.price' => 'required|numeric|min:0',
+public function store(Request $request)
+{
+    dd($request->all());
+    // $request->validate([
+    //     'project_id' => 'required|exists:projects,id',
+    //     'products' => 'required|array|min:1',
+    //     'products.*.product_name' => 'required|string|max:255',
+    //     'products.*.quantity' => 'required|numeric|min:1',
+    //     'products.*.unit' => 'required|string|max:50',
+    //     'products.*.images' => 'required|array|min:1',
+    //     'products.*.images.*.file' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+    //     'products.*.images.*.price' => 'required|numeric|min:0',
+    // ]);
+
+    // DB::beginTransaction();
+
+    // try {
+        // ✅ Create the order
+        $order = Order::create([
+            'project_id' => $request->project_id,
+            'user_id' => auth()->id(),
+            'status' => 'pending',
         ]);
 
-        DB::transaction(function () use ($request) {
-            // Create the main order
-            $order = Order::create([
-                'project_id' => $request->project_id,
-                'status' => 'pending', // from your input field
-            ]);
+        // ✅ Loop over each product
+        foreach ($request->products as $productData) {
 
-            // Create order items
-            foreach ($request->products as $item) {
-                OrderItems::create([
+            $productName = $productData['product_name'];
+            $quantity = $productData['quantity'];
+            $unit = $productData['unit'];
+
+            // ✅ Loop over each image for this product
+            foreach ($productData['images'] as $imageData) {
+
+                $price = $imageData['price'];
+                // $total = $quantity * $price;
+
+                // ✅ Handle image upload
+                $imagePath = null;
+                if (isset($imageData['file']) && $imageData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $imagePath = $imageData['file']->store('order_images', 'public');
+                }
+
+                // ✅ Save each image as a separate OrderItem
+                ProductItem::create([
                     'order_id' => $order->id,
-                    'project_id' => $request->project_id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    // 'price' => $item['price'],// optional if you want r  ow total
+                    'product_id' => $productName,
+                    'title' => $title,
+                    'price' => $price,
+                    'image' => $imagePath,
                 ]);
             }
-        });
+        }
 
-        return redirect()->route('orders.index')->with('success', 'Order created successfully.');
-    }
+    //     DB::commit();
+
+    //     return redirect()->route('orders.index')->with('success', 'Order created successfully!');
+    // } catch (\Exception $e) {
+    //     DB::rollBack();
+        return back()->with('error', 'Failed to create order: ' . $e->getMessage())->withInput();
+    // }
+}
+
+
 
     public function show(Order $order)
     {
@@ -217,10 +249,6 @@ class OrderManagerController extends Controller
 
         return redirect()->back()->with('success', 'Order status updated successfully.');
     }
-
-
-
-
 
 
     public function historydetails($id)

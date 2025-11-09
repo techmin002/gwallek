@@ -10,183 +10,232 @@
 @endsection
 
 @section('content')
-    <div class="content-wrapper">
-        <section class="content-header">
-            <div class="container-fluid">
-                <h1>Create Order</h1>
-            </div>
-        </section>
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <h1>Create Order</h1>
+        </div>
+    </section>
 
-        <section class="content">
-            <div class="container-fluid">
-                <div class="modal-content shadow-lg modal-advanced" style="border-radius: 24px; border: none;">
-                    <form action="{{ route('orders.store') }}" method="POST">
-                        @csrf
-                        <div class="modal-header justify-content-center modal-header-advanced">
-                            <h5 class="mb-0 fs-3 fw-bold text-white">
-                                <i class="bi bi-plus-circle-dotted me-2"></i> Order Details
-                            </h5>
-                        </div>
-                        <div class="modal-body modal-body-advanced">
-                            <div class="container-fluid">
-                                <div class="row gy-3">
-                                    <div class="col-lg-6">
-                                        <label class="form-label12 fw-semibold">Select Project</label>
-                                        <select name="project_id" class="form-control border-primary shadow-sm" required>
-                                            <option value="">-- Select Project --</option>
-                                            @foreach ($projects as $project)
-                                                <option value="{{ $project->id }}">{{ $project->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="modal-content shadow-lg modal-advanced" style="border-radius: 24px; border: none;">
+                <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header justify-content-center modal-header-advanced">
+                        <h5 class="mb-0 fs-3 fw-bold text-white">
+                            <i class="bi bi-plus-circle-dotted me-2"></i> Order Details
+                        </h5>
+                    </div>
+
+                    <div class="modal-body modal-body-advanced">
+                        <div class="container-fluid">
+                            <div class="row gy-3">
+                                <div class="col-lg-6">
+                                    <label class="form-label12 fw-semibold">Select Project</label>
+                                    <select name="project_id" class="form-control border-primary shadow-sm" required>
+                                        <option value="">-- Select Project --</option>
+                                        @foreach ($projects as $project)
+                                            <option value="{{ $project->id }}">{{ $project->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
-
-                            <!-- ✅ Product Section -->
-                            <h3 class="mt-5 mb-3 text-primary border-bottom pb-2 section-title">
-                                <i class="bi bi-bag-check me-2"></i>
-                                Products
-                            </h3>
-                            <div class="container-fluid">
-                                <div id="productContainer"></div>
-                                <button type="button" class="btn btn-outline-primary mt-3" id="addProductRow">
-                                    <i class="bi bi-plus-circle"></i> Add Product
-                                </button>
-                            </div>
                         </div>
 
-                        <div class="modal-footer justify-content-start modal-footer-advanced">
-                            <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm">
-                                <i class="bi bi-save me-2"></i> Save Order
+                        <!-- ✅ Combined Products + Multiple Images Section -->
+                        <h3 class="mt-5 mb-3 text-primary border-bottom pb-2 section-title">
+                            <i class="bi bi-bag-check me-2"></i>
+                            Products & Images
+                        </h3>
+
+                        <div class="container-fluid">
+                            <div id="productContainer"></div>
+                            <button type="button" class="btn btn-outline-primary mt-3" id="addProductRow">
+                                <i class="bi bi-plus-circle"></i> Add Product
                             </button>
-                            <a href="{{ route('orders.index') }}" class="btn btn-danger px-5 py-2 fw-bold shadow-sm">
-                                <i class="bi bi-x-circle me-2"></i> Cancel
-                            </a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="modal-footer justify-content-start modal-footer-advanced">
+                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-save me-2"></i> Save Order
+                        </button>
+                        <a href="{{ route('orders.index') }}" class="btn btn-danger px-5 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-x-circle me-2"></i> Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
+</div>
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <style>
-        .modal-advanced {
-            background: linear-gradient(135deg, #f8fafc 70%, #e0f7fa 100%);
-            border-radius: 24px;
-            box-shadow: 0 8px 40px rgba(8, 164, 164, 0.15);
-        }
+<style>
+    .modal-advanced {
+        background: linear-gradient(135deg, #f8fafc 70%, #e0f7fa 100%);
+        border-radius: 24px;
+        box-shadow: 0 8px 40px rgba(8, 164, 164, 0.15);
+    }
 
-        .modal-header-advanced {
-            background: linear-gradient(90deg, #08A4A4 60%, #0E8388 100%);
-            color: #fff;
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            border-bottom: 2px solid #e0f7fa;
-            padding: 1.2rem 1.5rem;
-        }
+    .modal-header-advanced {
+        background: linear-gradient(90deg, #08A4A4 60%, #0E8388 100%);
+        color: #fff;
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        border-bottom: 2px solid #e0f7fa;
+        padding: 1.2rem 1.5rem;
+    }
 
-        .modal-body-advanced {
-            background: linear-gradient(120deg, #f8f9fa 80%, #e0f7fa 100%);
-            padding: 2rem;
-        }
+    .modal-body-advanced {
+        background: linear-gradient(120deg, #f8f9fa 80%, #e0f7fa 100%);
+        padding: 2rem;
+    }
 
-        .modal-footer-advanced {
-            background: #f1f1f1;
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            border-top: 2px solid #e0f7fa;
-            padding: 1rem 1.5rem;
-        }
+    .modal-footer-advanced {
+        background: #f1f1f1;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+        border-top: 2px solid #e0f7fa;
+        padding: 1rem 1.5rem;
+    }
 
-        .form-label12 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #222;
-        }
+    .form-label12 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+    }
 
-        .form-control {
-            border-radius: 0.7rem;
-            font-size: 1rem;
-        }
+    .form-control {
+        border-radius: 0.7rem;
+        font-size: 1rem;
+    }
 
-        .form-control:focus {
-            box-shadow: 0 0 0 0.2rem rgba(8, 164, 164, 0.18);
-            border-color: #08A4A4;
-            background: #f0fdfa;
-        }
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(8, 164, 164, 0.18);
+        border-color: #08A4A4;
+        background: #f0fdfa;
+    }
 
-        .item-row {
-            background: #fff;
-            border: 1px solid #e0f7fa;
-            border-radius: 0.7rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
+    .item-row {
+        background: #fff;
+        border: 1px solid #e0f7fa;
+        border-radius: 0.7rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
 
-        .remove-row {
-            border-radius: 0.5rem;
-        }
-    </style>
+    .product-block {
+        background: #ffffff;
+        border: 1px solid #d1f3f3;
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+    }
 
-    <script>
-        let rowIndex = 0;
-        const products = @json($products);
+    .image-row {
+        background: #f8f9fa;
+        border: 1px dashed #b2ebf2;
+        border-radius: 0.5rem;
+        padding: 0.8rem;
+    }
 
-        function createRow(index) {
-            let options = products.map(p =>
-                `<option value="${p.id}" data-unit="${p.unit ? p.unit.name : 'N/A'}">${p.name}</option>`
-            ).join('');
+    .remove-row, .remove-product-row {
+        border-radius: 0.5rem;
+    }
+</style>
 
-            return `
-            <div class="row gy-3 align-items-end item-row product-row">
-                <div class="col-md-4">
-                    <label class="form-label12 fw-semibold">Product</label>
-                    <select name="products[${index}][product_id]" class="form-control product-select border-primary shadow-sm" required>
-                        <option value="">-- Select Product --</option>
-                        ${options}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label12 fw-semibold">Quantity</label>
-                    <input type="number" name="products[${index}][quantity]" class="form-control quantity-input border-primary shadow-sm" min="1" value="1" required>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label12 fw-semibold">Unit</label>
-                    <input type="text" name="products[${index}][unit]" class="form-control unit-input border-primary shadow-sm" readonly>
-                </div>
-                <div class="col-md-2 d-flex">
-                    <button type="button" class="btn btn-danger remove-row">
-                        <i class="bi bi-trash"></i> Delete
-                    </button>
-                </div>
-            </div>`;
-        }
+<script>
+let productIndex = 0;
 
-        $(function() {
-            const container = $("#productContainer");
+// ✅ Create product block with multiple images section
+function createProductRow(index) {
+    return `
+    <div class="item-row product-block mb-4 p-3 border rounded">
+        <div class="row gy-3 align-items-center">
+            <div class="col-md-3">
+                <input type="text" name="products[${index}][product_name]" class="form-control border-primary shadow-sm" placeholder="Product Name" required>
+            </div>
 
-            function addRow() {
-                const html = createRow(rowIndex++);
-                container.append(html);
-            }
+            <div class="col-md-2">
+                <input type="number" name="products[${index}][quantity]" class="form-control border-primary shadow-sm quantity-input" min="1" value="1" required>
+            </div>
 
-            addRow(); // initial row
+            <div class="col-md-2">
+                <input type="text" name="products[${index}][unit]" class="form-control border-primary shadow-sm" placeholder="Unit" required>
+            </div>
 
-            $("#addProductRow").on("click", addRow);
+            <div class="col-md-2 text-center">
+                <button type="button" class="btn btn-sm btn-outline-success add-image-row" data-index="${index}">
+                    <i class="bi bi-plus-circle"></i> Add Image
+                </button>
+            </div>
 
-            $(document).on("change", ".product-select", function() {
-                const selected = $(this).find(":selected");
-                const unit = selected.data('unit') || '';
-                $(this).closest(".product-row").find('.unit-input').val(unit);
-            });
+            <div class="col-md-2 text-center">
+                <button type="button" class="btn btn-danger remove-product-row" title="Remove Product">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
 
-            $(document).on("click", ".remove-row", function() {
-                $(this).closest(".product-row").remove();
-            });
-        });
-    </script>
+        <!-- Container for multiple image+price pairs -->
+        <div class="image-price-container mt-3" data-product-index="${index}"></div>
+    </div>`;
+}
+
+// ✅ Create image + price input row
+// ✅ Create image + price + title input row
+function createImageRow(productIndex, imageIndex) {
+    return `
+    <div class="row gy-3 align-items-center image-row mb-2">
+        <div class="col-md-4">
+            <input type="file" name="products[${productIndex}][images][${imageIndex}][file]" class="form-control border-primary shadow-sm" accept="image/*" required>
+        </div>
+        <div class="col-md-4">
+            <input type="text" name="products[${productIndex}][images][${imageIndex}][title]" class="form-control border-primary shadow-sm" placeholder="Image Title" required>
+        </div>
+        <div class="col-md-2">
+            <input type="number" step="0.01" name="products[${productIndex}][images][${imageIndex}][price]" class="form-control border-primary shadow-sm" placeholder="Price" required>
+        </div>
+        <div class="col-md-2 text-center">
+            <button type="button" class="btn btn-outline-danger remove-image-row">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </div>
+    </div>`;
+}
+
+$(function() {
+    const container = $("#productContainer");
+
+    // Add new product
+    $("#addProductRow").on("click", function() {
+        container.append(createProductRow(productIndex++));
+    });
+
+    // Remove product
+    $(document).on("click", ".remove-product-row", function() {
+        $(this).closest(".product-block").remove();
+    });
+
+    // Add image row inside specific product
+    $(document).on("click", ".add-image-row", function() {
+        const productIndex = $(this).data("index");
+        const imageContainer = $(`.image-price-container[data-product-index="${productIndex}"]`);
+        const imageIndex = imageContainer.find(".image-row").length;
+        imageContainer.append(createImageRow(productIndex, imageIndex));
+    });
+
+    // Remove specific image row
+    $(document).on("click", ".remove-image-row", function() {
+        $(this).closest(".image-row").remove();
+    });
+
+    // Add one product row by default
+    $("#addProductRow").trigger("click");
+});
+</script>
 @endsection

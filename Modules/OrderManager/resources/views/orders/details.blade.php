@@ -26,14 +26,16 @@
                 </div>
             </div>
         </section>
+
+        <!-- Project Info -->
         <div class="card shadow-lg border-0 rounded mb-4"
             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <div class="card-body text-center text-white py-3">
                 <h5 class="mb-2 fw-bold">Project</h5>
                 <h3 class="fw-bold">{{ $order->project->name ?? 'N/A' }}</h3>
-                {{-- <h3 class="fw-bold">{{ $order->project->branch->id ?? 'N/A' }}</h3> --}}
             </div>
         </div>
+
         <!-- Main content -->
         <section class="content">
             <div class="container-fluid">
@@ -45,13 +47,12 @@
                         <div class="d-flex align-items-center">
                             <h5 class="mb-0 me-3" style="margin-right: 5px"><strong>Status:</strong></h5>
                             @if ($order->status == 'completed')
-                                <button class="btn btn-sm btn-success"> {{ ucfirst($order->status) }}</button>
+                                <button class="btn btn-sm btn-success">{{ ucfirst($order->status) }}</button>
                             @elseif ($order->status == 'reject')
-                                <button class="btn btn-sm btn-danger"> {{ ucfirst($order->status) }}</button>
+                                <button class="btn btn-sm btn-danger">{{ ucfirst($order->status) }}</button>
                             @else
-                                <button class="btn btn-sm btn-warning"> {{ ucfirst($order->status) }}</button>
+                                <button class="btn btn-sm btn-warning">{{ ucfirst($order->status) }}</button>
                             @endif
-
                         </div>
 
                         <!-- Center: Take Action -->
@@ -77,7 +78,7 @@
                                     @csrf
                                     @method('PUT')
                                     <div class="modal-content">
-                                        <div class="modal-header  bg-info">
+                                        <div class="modal-header bg-info">
                                             <h5 class="modal-title" id="actionModalLabel">Take Action on Order</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
@@ -90,9 +91,10 @@
                                                 <input type="hidden" name="products[{{ $index }}][quantity]"
                                                     value="{{ $item->quantity }}">
                                             @endforeach
-                                            <input type="hidden" name='branch_id'
+                                            <input type="hidden" name="branch_id"
                                                 value="{{ $order->project->branch->id ?? 'N/A' }}">
                                             <input type="hidden" name="order_id" value="{{ $order->id }}">
+
                                             <div class="form-group">
                                                 <label><strong>Select Status</strong></label>
                                                 <select name="status" class="form-control" required>
@@ -124,13 +126,13 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-
                                             </div>
 
                                             <div class="form-group">
                                                 <label><strong>Date</strong></label>
                                                 <input type="date" name="action_date" class="form-control" required>
                                             </div>
+
                                             <div class="form-group">
                                                 <label><strong>Message</strong></label>
                                                 <textarea name="message" class="form-control" rows="3" placeholder="Enter message..."></textarea>
@@ -147,40 +149,67 @@
                         </div>
                     </div>
 
+                    <!-- Products Table -->
                     <div class="card-body">
                         <table id="example1" class="table table-bordered align-middle text-center mb-0">
                             <thead class="table-dark">
                                 <tr>
                                     <th>S.N</th>
+                                    <th>Image</th> <!-- ✅ Added -->
                                     <th>Product Name</th>
                                     <th>Unit</th>
                                     <th>Quantity</th>
+                                    <th>Price</th> <!-- ✅ Added -->
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($order->products as $index => $item)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
+                                        
+                                        <!-- ✅ Product Image -->
+                                        <td>
+                                            @if ($item->product->image)
+                                                <img src="{{ asset('uploads/products/' . $item->product->image) }}"
+                                                    alt="Product Image"
+                                                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                            @else
+                                                <span class="text-muted">No Image</span>
+                                            @endif
+                                        </td>
+
                                         <td class="text-start ps-4">{{ $item->product->name ?? 'N/A' }}</td>
                                         <td>{{ $item->product->unit->name ?? 'N/A' }}</td>
                                         <td>{{ $item->quantity }}</td>
+
+                                        <!-- ✅ Product Price -->
+                                        <td>
+                                            @if(isset($item->product->price))
+                                                Rs. {{ number_format($item->product->price, 2) }}
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">No products found for this order</td>
+                                        <td colspan="6" class="text-center">No products found for this order</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <th>S.N</th>
+                                    <th>Image</th>
                                     <th>Product Name</th>
                                     <th>Unit</th>
                                     <th>Quantity</th>
+                                    <th>Price</th>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
+
                     <div class="card-footer">
                         <a href="javascript:void(0);" onclick="history.back();" class="btn btn-secondary mt-3">
                             <i class="fa fa-arrow-left"></i> Back
@@ -188,7 +217,6 @@
                     </div>
                 </div>
             </div>
-
         </section>
     </div>
 @endsection

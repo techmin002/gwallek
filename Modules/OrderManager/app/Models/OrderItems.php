@@ -19,9 +19,11 @@ class OrderItems extends Model
     protected $fillable = [
         'order_id',
         'project_id',
-        'product_id',
+        'product_name',
         'quantity',
         'price',
+        'image',
+        'total',
     ];
 
     public function order()
@@ -38,8 +40,5 @@ class OrderItems extends Model
     {
         return $this->belongsTo(Product::class);
     }
-    // protected static function newFactory(): OrderItemsFactory
-    // {
-    //     // return OrderItemsFactory::new();
-    // }
+   
 }

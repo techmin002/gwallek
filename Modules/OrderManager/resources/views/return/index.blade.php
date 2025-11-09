@@ -49,7 +49,9 @@
                                         <tr>
                                             <th>S.N</th>
                                             <th>Site</th>
+                                            @if (auth()->user()->name === 'Super Admin')
                                             <th>Branch</th>
+                                            @endif
                                             <th>Date</th>
                                             <th>Details</th>
                                             <th>Action</th>
@@ -63,9 +65,14 @@
                                                 </td>
                                                 <td class="text-center"><strong>{{ $return->site->name ?? 'N/A' }}</strong>
                                                 </td>
-                                                <td class="text-center"><span
-                                                        class="badge badge-info">{{ $return->site->branch->name ?? 'N/A' }}</span>
-                                                </td>
+                                                @if (auth()->user()->name === 'Super Admin')
+                                                    <td class="text-center">
+                                                        <span class="badge badge-info">
+                                                            {{ $return->site->branch->name ?? 'N/A' }}
+                                                        </span>
+                                                    </td>
+                                                @endif
+
                                                 <td class="text-center"><i class="far fa-clock text-muted"></i>
                                                     {{ $return->created_at->format('d M, Y H:i') }}</td>
                                                 <td class="text-center">
@@ -105,7 +112,9 @@
                                         <tr>
                                             <th>S.N</th>
                                             <th>Site</th>
+                                            @if (auth()->user()->name === 'Super Admin')
                                             <th>Branch</th>
+                                            @endif
                                             <th>Date</th>
                                             <th>Details</th>
                                             <th>Action</th>

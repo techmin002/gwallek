@@ -1440,8 +1440,70 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
+                                        {{-- Message permission --}}
+                                         <div class="col-lg-4 col-md-6 mb-3">
+                                            <div class="card h-100 border-0 shadow">
+                                                <div class="card-header">
+                                                   Messages
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="access_messages" name="permissions[]"
+                                                                    value="access_messages"
+                                                                    {{ old('access_messages') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="access_messages">Access</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="show_messages" name="permissions[]"
+                                                                    value="show_messages"
+                                                                    {{ old('show_messages') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="show_messages">View</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="create_messages" name="permissions[]"
+                                                                    value="create_messages"
+                                                                    {{ old('create_messages') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="create_messages">Create</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="edit_messages" name="permissions[]"
+                                                                    value="edit_messages"
+                                                                    {{ old('edit_messages') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="edit_messages">Edit</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="delete_messages" name="permissions[]"
+                                                                    value="delete_messages"
+                                                                    {{ old('delete_messages') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="delete_messages">Delete</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>

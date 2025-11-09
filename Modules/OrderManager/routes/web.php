@@ -53,4 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('returns/destroy/{id}', [PurcheshController::class, 'returndestroy'])->name('returns.destroy');
     Route::put('returns/update/{id}', [PurcheshController::class, 'returnupdate'])->name('returns.update');
 
+    Route::get('dashboard', [PurcheshController::class, 'dashboard'])->name('dashboard.index');
+
+
 });

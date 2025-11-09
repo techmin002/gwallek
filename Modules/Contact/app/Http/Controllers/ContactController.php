@@ -4,6 +4,7 @@ namespace Modules\Contact\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Modules\Contact\Models\Contact;
 use Modules\Contact\Models\MessageFrom;
 
@@ -14,7 +15,18 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contacts = Contact::orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+
+
+        if ($user->access_type !== 'Super Admin') {
+        
+            $contacts = Contact::where('branch_id', $user->branch_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $contacts = Contact::orderBy('created_at', 'desc')->get();
+        }
+
         return view('contact::contact.index', compact('contacts'));
     }
 

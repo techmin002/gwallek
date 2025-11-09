@@ -49,8 +49,11 @@
                                             <th>S.N</th>
                                             <th>Project Name</th>
                                             <th>View Details</th>
-                                            <th>Branch</th>
-                                            <th>Date</th>
+                                            @if (auth()->user()->access_type == 'Super Admin')
+                                                <th>Branch</th>
+                                            @endif
+                                            <th>Images</th>kalhi
+                                            <th>Date </th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -59,23 +62,33 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $order->project->name ?? 'N/A' }}</td>
-
                                                 <td>
                                                     <a href="{{ route('orders.show', $order->id) }}"
                                                         class="btn btn-sm btn-secondary">
                                                         <i class="fa fa-eye"></i> View
                                                     </a>
                                                 </td>
-                                                <td>{{ $order->project->branch->name ?? 'N/A' }}</td>
+                                                @if (auth()->user()->access_type == 'Super Admin')
+                                                    <td>{{ $order->project->branch->name ?? 'N/A' }}</td>
+                                                @endif
+                                                <td class="text-center">
+                                                    @if ($order->image)
+                                                        <img src="{{ asset('upload/order_images/' . $order->image) }}"
+                                                            width="50">
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+
                                                 <td>
                                                     {{ $order->created_at ? $order->created_at->format('d M, Y H:i') : 'N/A' }}
                                                 </td>
                                                 <td>
                                                     <button
                                                         class="btn btn-sm
-        @if ($order->status == 'completed') btn-success
-        @elseif($order->status == 'reject') btn-danger
-        @else btn-warning @endif">
+                                                             @if ($order->status == 'completed') btn-success
+                                                             @elseif($order->status == 'reject') btn-danger
+                                                             @else btn-warning @endif">
                                                         {{ ucfirst($order->status ?? 'Pending') }}
                                                     </button>
                                                 </td>
@@ -87,7 +100,10 @@
                                             <th>S.N</th>
                                             <th>Project Name</th>
                                             <th>View Details</th>
-                                            <th>Branch</th>
+                                            @if (auth()->user()->access_type == 'Super Admin')
+                                                <th>Branch</th>
+                                            @endif
+                                            <th>Images</th>
                                             <th>Date</th>
                                             <th>Status</th>
                                         </tr>

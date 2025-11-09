@@ -155,7 +155,9 @@
                                             <th>S.N</th>
                                             <th>Project Name</th>
                                             <th>View Details</th>
+                                            @if (auth()->user()->access_type == 'Super Admin')
                                             <th>Branch</th>
+                                            @endif
                                             <th>Date</th>
                                             <th>Status</th>
                                         </tr>
@@ -172,7 +174,9 @@
                                                         <i class="fa fa-eye"></i> View
                                                     </a>
                                                 </td>
+                                                @if (auth()->user()->access_type == 'Super Admin')
                                                 <td>{{ $order->project->branch->name ?? 'N/A' }}</td>
+                                                @endif
                                                 <td>
                                                     {{ $order->created_at ? $order->created_at->format('d M, Y H:i') : 'N/A' }}
                                                 </td>
@@ -193,7 +197,9 @@
                                             <th>S.N</th>
                                             <th>Project Name</th>
                                             <th>View Details</th>
+                                            @if (auth()->user()->access_type == 'Super Admin')
                                             <th>Branch</th>
+                                            @endif
                                             <th>Date</th>
                                             <th>Status</th>
                                         </tr>
