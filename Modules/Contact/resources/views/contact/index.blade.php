@@ -45,7 +45,9 @@
                                             <th>Name</th>
                                             <th>Subject</th>
                                             <th>Message</th>
+                                            @if (auth()->user()->name === 'Super Admin')
                                             <th>Branch Name</th>
+                                            @endif
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -58,7 +60,9 @@
                                                 <td>{{ $contact->email }}</td>
                                                 <td>{{ $contact->subject ?? '-' }}</td>
                                                 <td>{{ $contact->message }}</td>
-                                                <td>{{ $contact->branch->name ?? 'N/A' }}</td>
+                                                @if (auth()->user()->name === 'Super Admin')
+                                                    <td>{{ $contact->branch->name ?? 'N/A' }}</td>
+                                                @endif
                                                 <td>
                                                     @if ($contact->status == 'pending')
                                                         <a href="{{ route('messages.toggleStatus', $contact->id) }}"
@@ -98,7 +102,9 @@
                                             <th>Name</th>
                                             <th>Subject</th>
                                             <th>Message</th>
+                                            @if (auth()->user()->name === 'Super Admin')
                                             <th>Branch Name</th>
+                                            @endif
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>

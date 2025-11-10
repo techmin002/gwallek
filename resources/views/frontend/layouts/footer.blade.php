@@ -542,15 +542,6 @@
 </script>
 
 
-<script>
-    document.getElementById('quoteForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        // Add form submission logic here (AJAX or form action)
-        alert('Thank you! We will contact you shortly.');
-        var modal = bootstrap.Modal.getInstance(document.getElementById('quoteModal'));
-        modal.hide();
-    });
-</script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 
 

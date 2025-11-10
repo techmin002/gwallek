@@ -94,18 +94,25 @@
                                         </div>
 
                                         <!-- Branch -->
-                                        <div class="col-md-6 mt-3">
-                                            <label class="fw-semibold">Branch</label>
-                                            <select name="branch_id" class="form-control">
-                                                <option value="">Select Branch</option>
-                                                @foreach ($branches as $branch)
-                                                    <option value="{{ $branch->id }}"
-                                                        {{ $product->branch_id == $branch->id ? 'selected' : '' }}>
-                                                        {{ $branch->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                        @if (auth()->user()->name === 'Super Admin')
+                                            <!-- Show branch select only for Super Admin -->
+                                            <div class="col-md-6 mt-3">
+                                                <label class="fw-semibold">Branch</label>
+                                                <select name="branch_id" class="form-control">
+                                                    <option value="">Select Branch</option>
+                                                    @foreach ($branches as $branch)
+                                                        <option value="{{ $branch->id }}"
+                                                            {{ $product->branch_id == $branch->id ? 'selected' : '' }}>
+                                                            {{ $branch->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @else
+                                            <!-- Hidden input for normal users -->
+                                            <input type="hidden" name="branch_id" value="{{ auth()->user()->branch_id }}">
+                                        @endif
+
 
                                         <!-- Main Image -->
                                         <div class="col-md-6 mt-3">
@@ -134,8 +141,9 @@
                                                 <div class="card-body">
                                                     <input type="hidden" name="status" value="off">
                                                     <input type="checkbox" name="status" value="on"
-                                                        {{ $product->status == 'on' ? 'checked' : '' }} data-bootstrap-switch
-                                                        data-off-color="danger" data-on-color="success">
+                                                        {{ $product->status == 'on' ? 'checked' : '' }}
+                                                        data-bootstrap-switch data-off-color="danger"
+                                                        data-on-color="success">
                                                 </div>
                                             </div>
                                         </div>

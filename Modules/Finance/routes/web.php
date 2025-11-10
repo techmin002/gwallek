@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\BankController;
 use Modules\Finance\Http\Controllers\FinanceController;
+use Modules\Finance\Http\Controllers\DueOrderController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('finances', FinanceController::class)->names('finance');
@@ -15,4 +16,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('banks', BankController::class)->names('banks');
     Route::get('banks/status/{id}', [BankController::class, 'status'])->name('banks.status');
+    Route::resource('due_orders', DueOrderController::class)->names('due_orders');
 });

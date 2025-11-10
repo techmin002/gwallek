@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('product_id');
+            $table->string('product_name');
             $table->integer('quantity')->default(1);
             $table->decimal('price', 10, 2)->default(0);
             $table->timestamps();
@@ -23,7 +23,6 @@ return new class extends Migration
             // Foreign keys
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('project_id')->references('id')->on('sites')->onDelete('cascade');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         });
     }
 

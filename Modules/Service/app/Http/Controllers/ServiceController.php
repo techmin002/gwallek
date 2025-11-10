@@ -48,7 +48,7 @@ class ServiceController extends Controller
         if ($request->hasFile('icon')) {
             // Upload new Icon
             $iconName = $request->file('icon');
-            $iconName = time() . '.' . $request->icon->extension();
+            $iconName = time() . '.' . $request->icon->getClientOriginalExtension();
             $request->icon->move(public_path('upload/images/services'), $iconName);
         }
         // create service

@@ -18,11 +18,21 @@ class ExpenseCategoryController extends Controller
      */
     public function index()
     {
-        $expenses = ExpenseCategory::orderBy('created_at','DESC')->with('branch')->get();
-        $branches = Branch::where('status','on')->get();
-        return view('expenses::category.index', compact('expenses','branches'));
+        if (auth()->user()->name == 'Super Admin') {
+            $expenses = ExpenseCategory::orderBy('created_at', 'DESC')
+                ->with('branch')
+                ->get();
+        } else {
+            $expenses = ExpenseCategory::where('branch_id', auth()->user()->branch_id)
+                ->orderBy('created_at', 'DESC')
+                ->with('branch')
+                ->get();
+        }
+        $branches = Branch::where('status', 'on')->get();
+
+        return view('expenses::category.index', compact('expenses', 'branches'));
     }
-  
+
     /**
      * Show the form for creating a new resource.
      * @return Renderable
@@ -39,10 +49,10 @@ class ExpenseCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // dd('hello');
         $image = '';
-        if($request->image)
-        {
-            $image = time().'.'.$request->image->extension();
+        if ($request->image) {
+            $image = time() . '.' . $request->image->extension();
             $request->image->move(public_path('upload/images/expenses-category'), $image);
         }
         $slug = Str::slug($request->title);
@@ -50,12 +60,12 @@ class ExpenseCategoryController extends Controller
             'title' => $request->title,
             'slug' => $slug,
             'image' => $image,
-            'branch_id' => $request->branch_id,
+            'branch_id' => $request->branch_id ?? auth()->user()->branch_id,
             'created_by' => auth()->user()->id,
             'description' => $request->description,
             'status' => $request->status
         ]);
-        return back()->with('success','Expense Category Added Successfully');
+        return back()->with('success', 'Expense Category Added Successfully');
     }
 
     /**
@@ -86,11 +96,11 @@ class ExpenseCategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $cat = ExpenseCategory::findOrfail($id);
         $image = $cat->image;
-        if($request->image)
-        {
-            $image = time().'.'.$request->image->extension();
+        if ($request->image) {
+            $image = time() . '.' . $request->image->extension();
             $request->image->move(public_path('upload/images/expenses-category'), $image);
         }
         $slug = Str::slug($request->title);
@@ -98,11 +108,11 @@ class ExpenseCategoryController extends Controller
             'title' => $request->title,
             'slug' => $slug,
             'image' => $image,
-            'branch_id' => $request->branch_id,
+            'branch_id' => $request->branch_id ?? auth()->user()->branch_id,
             'description' => $request->description,
-            'status' => $request->status
+            'status' => $request->status ?? 'off'
         ]);
-        return back()->with('success','Expense Category Updated Successfully');
+        return back()->with('success', 'Expense Category Updated Successfully');
     }
 
     /**
@@ -112,23 +122,21 @@ class ExpenseCategoryController extends Controller
      */
     public function destroy($id)
     {
-        $categorys= ExpenseCategory::findOrfail($id);
+        $categorys = ExpenseCategory::findOrfail($id);
         $categorys->delete();
-        return redirect()->back()->with('success','Category Deleted!');
+        return redirect()->back()->with('success', 'Category Deleted!');
     }
     public function Status($id)
     {
-        $categorys= ExpenseCategory::findOrfail($id);
-        if($categorys->status == 'on')
-        {
-            $status ='off';
-        }else{
-            $status ='on';
+        $categorys = ExpenseCategory::findOrfail($id);
+        if ($categorys->status == 'on') {
+            $status = 'off';
+        } else {
+            $status = 'on';
         }
         $categorys->update([
             'status' => $status
         ]);
-        return redirect()->back()->with('success','Categgory Updated!');
+        return redirect()->back()->with('success', 'Categgory Updated!');
     }
-   
 }

@@ -18,6 +18,8 @@ class Order extends Model
     protected $fillable = [
         'project_id',
         'status',
+        'price',     
+        'image',
     ];
 
     public function project()

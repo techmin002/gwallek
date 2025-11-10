@@ -41,7 +41,9 @@
                                             <th>S.N</th>
                                             <th>Project Name</th>
                                             <th>View Details</th>
+                                            @if (auth()->user()->name === 'Super Admin')
                                             <th>Branch</th>
+                                            @endif
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -57,7 +59,10 @@
                                                         <i class="fa fa-eye"></i> View
                                                     </a>
                                                 </td>
-                                                <td>{{ $order->project->branch->name ?? 'N/A' }}</td>
+                                                @if (auth()->user()->name === 'Super Admin')
+                                                    <td>{{ $order->project->branch->name ?? 'N/A' }}</td>
+                                                @endif
+
                                                 <td>
                                                     <button
                                                         class="btn btn-sm
@@ -75,7 +80,9 @@
                                             <th>S.N</th>
                                             <th>Project Name</th>
                                             <th>View Details</th>
+                                            @if (auth()->user()->name === 'Super Admin')
                                             <th>Branch</th>
+                                            @endif
                                             <th>Status</th>
                                         </tr>
                                     </tfoot>

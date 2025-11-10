@@ -63,26 +63,75 @@ class PurcheshController extends Controller
 
     public function dispatched()
     {
-        // dd('hello');
-        $orders = Order::with('project.branch')->where('status', 'onloading')->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+
+        // 🧑‍💼 Super Admin sees all orders
+        if ($user->name === 'Super Admin') {
+            $orders = Order::with('project.branch')
+                ->where('status', 'onloading')
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+        // 👤 Other users see only their branch's orders
+        else {
+            $orders = Order::whereHas('project', function ($query) use ($user) {
+                $query->where('branch_id', $user->branch_id);
+            })
+                ->with('project.branch')
+                ->where('status', 'onloading')
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
         return view('ordermanager::dispatch.index', compact('orders'));
     }
-    // public function tracking()
-    // {
 
-    //     // $orders = Order::with('project.branch')->where('status', 'dispatch') ->orderBy('id', 'desc')->get();
-    //     return view('ordermanager::tracking.index');
-    // }
     public function rejected()
     {
 
-        $orders = Order::with('project.branch')->where('status', 'reject')->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+
+        if ($user->name === 'Super Admin') {
+            // 🧑‍💼 Super Admin: See all rejected orders
+            $orders = Order::with('project.branch')
+                ->where('status', 'reject')
+                ->orderBy('id', 'desc')
+                ->get();
+        } else {
+            // 👤 Other Users: See only orders from their branch
+            $orders = Order::whereHas('project', function ($query) use ($user) {
+                $query->where('branch_id', $user->branch_id);
+            })
+                ->with('project.branch')
+                ->where('status', 'reject')
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
         return view('ordermanager::reject.index', compact('orders'));
     }
     public function completed()
     {
 
-        $orders = Order::with('project.branch')->where('status', 'completed')->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+
+        if ($user->name === 'Super Admin' || $user->hasRole('Super Admin')) {
+            // Super Admin can see all completed orders
+            $orders = Order::with('project.branch')
+                ->where('status', 'completed')
+                ->orderBy('id', 'desc')
+                ->get();
+        } else {
+            // Other users only see orders from their own branch
+            $orders = Order::with('project.branch')
+                ->where('status', 'completed')
+                ->whereHas('project', function ($query) use ($user) {
+                    $query->where('branch_id', $user->branch_id);
+                })
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
         return view('ordermanager::completed.index', compact('orders'));
     }
 
@@ -132,9 +181,6 @@ class PurcheshController extends Controller
 
         return view('ordermanager::return.index', compact('returns', 'projects', 'products'));
     }
-
-
-
 
     public function returnstore(Request $request)
     {
@@ -196,7 +242,6 @@ class PurcheshController extends Controller
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
     }
-
 
     public function returndetails($id)
     {
@@ -282,4 +327,58 @@ class PurcheshController extends Controller
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
     }
+
+    public function dashboard()
+{
+    $user = auth()->user();
+
+    if ($user->access_type == 'Super Admin') {
+        // Count all orders by status
+        $totalorders = Order::count();
+        $dispatchorders = Order::where('status', 'onloading')->count();
+        $completeorders = Order::where('status', 'completed')->count();
+        $rejectedorders = Order::where('status', 'reject')->count();
+
+        // ✅ Show only pending orders in dashboard table
+        $orders = Order::where('status', 'pending')
+            ->latest()
+            ->take(10)
+            ->get();
+
+    } else {
+        // For branch-specific users
+        $totalorders = Order::whereHas('project', function ($q) use ($user) {
+            $q->where('branch_id', $user->branch_id);
+        })->count();
+
+        $dispatchorders = Order::whereHas('project', function ($q) use ($user) {
+            $q->where('branch_id', $user->branch_id);
+        })->where('status', 'onloading')->count();
+
+        $completeorders = Order::whereHas('project', function ($q) use ($user) {
+            $q->where('branch_id', $user->branch_id);
+        })->where('status', 'completed')->count();
+
+        $rejectedorders = Order::whereHas('project', function ($q) use ($user) {
+            $q->where('branch_id', $user->branch_id);
+        })->where('status', 'reject')->count();
+
+        // ✅ Pending orders only, filtered by user's branch
+        $orders = Order::whereHas('project', function ($q) use ($user) {
+                $q->where('branch_id', $user->branch_id);
+            })
+            ->where('status', 'pending')
+            ->latest()
+            ->take(10)
+            ->get();
+    }
+
+    return view('ordermanager::dashboard.index', compact(
+        'totalorders',
+        'dispatchorders',
+        'completeorders',
+        'rejectedorders',
+        'orders'
+    ));
+}
 }
