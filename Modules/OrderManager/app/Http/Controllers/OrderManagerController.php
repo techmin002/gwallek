@@ -10,8 +10,8 @@ use Modules\Inventory\Entities\Inventory;
 use Modules\OrderManager\Models\Order;
 use Modules\OrderManager\Models\OrderHistory;
 use Modules\OrderManager\Models\OrderItems;
+use Modules\OrderManager\Models\Product;
 use Modules\OrderManager\Models\ProductItem;
-use Modules\Product\Models\Product;
 use Modules\ProjectManager\Models\Site;
 
 class OrderManagerController extends Controller
@@ -43,17 +43,14 @@ class OrderManagerController extends Controller
 
         $products = Product::with('unit')
             ->where('status', 'on')
-            ->orderBy('name')
             ->get();
 
         if ($user->access_type == 'Super Admin') {
             $projects = Site::where('status', 'on')
-                ->orderBy('name')
                 ->get();
         } else {
             $projects = Site::where('status', 'on')
                 ->where('branch_id', $user->branch_id)
-                ->orderBy('name')
                 ->get();
         }
 
@@ -62,68 +59,64 @@ class OrderManagerController extends Controller
 
 
 
-public function store(Request $request)
-{
-    dd($request->all());
-    // $request->validate([
-    //     'project_id' => 'required|exists:projects,id',
-    //     'products' => 'required|array|min:1',
-    //     'products.*.product_name' => 'required|string|max:255',
-    //     'products.*.quantity' => 'required|numeric|min:1',
-    //     'products.*.unit' => 'required|string|max:50',
-    //     'products.*.images' => 'required|array|min:1',
-    //     'products.*.images.*.file' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-    //     'products.*.images.*.price' => 'required|numeric|min:0',
-    // ]);
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        // $request->validate([
+        //     'project_id' => 'required|exists:projects,id',
+        //     'products' => 'required|array|min:1',
+        //     'products.*.product_name' => 'required|string|max:255',
+        //     'products.*.quantity' => 'required|integer|min:1',
+        //     'products.*.unit' => 'nullable|string|max:50',
+        // ]);
 
-    // DB::beginTransaction();
+        DB::beginTransaction();
 
-    // try {
-        // ✅ Create the order
-        $order = Order::create([
-            'project_id' => $request->project_id,
-            'user_id' => auth()->id(),
-            'status' => 'pending',
-        ]);
+        try {
+            // 🧾 Step 1: Create Order
+            $order = Order::create([
+                'project_id' => $request->project_id,
+                'status' => 'pending',
+            ]);
 
-        // ✅ Loop over each product
-        foreach ($request->products as $productData) {
-
-            $productName = $productData['product_name'];
-            $quantity = $productData['quantity'];
-            $unit = $productData['unit'];
-
-            // ✅ Loop over each image for this product
-            foreach ($productData['images'] as $imageData) {
-
-                $price = $imageData['price'];
-                // $total = $quantity * $price;
-
-                // ✅ Handle image upload
-                $imagePath = null;
-                if (isset($imageData['file']) && $imageData['file'] instanceof \Illuminate\Http\UploadedFile) {
-                    $imagePath = $imageData['file']->store('order_images', 'public');
-                }
-
-                // ✅ Save each image as a separate OrderItem
-                ProductItem::create([
+            // 🧰 Step 2: Loop through products
+            foreach ($request->products as $productData) {
+                $product = Product::create([
                     'order_id' => $order->id,
-                    'product_id' => $productName,
-                    'title' => $title,
-                    'price' => $price,
-                    'image' => $imagePath,
+                    'product_name' => $productData['product_name'],
+                    'quantity' => $productData['quantity'],
+                    'unit' => $productData['unit'] ?? null,
                 ]);
+
+                // 🖼️ Step 3: Handle product images
+                if (isset($productData['images'])) {
+                    foreach ($productData['images'] as $imgData) {
+                        $path = null;
+
+                        if (isset($imgData['file'])) {
+                            $path = $imgData['file']->store('product_images', 'public');
+                        }
+
+                        ProductItem::create([
+                            'project_id' => $request->project_id,
+                            'product_id' => $product->id,
+                            'image' => $path,
+                            'title' => $imgData['title'],
+                            'price' => $imgData['price'],
+                        ]);
+                    }
+                }
             }
+
+            DB::commit();
+
+            return redirect()->route('orders.index')->with('success', 'Order created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error: ' . $e->getMessage());
         }
+    }
 
-    //     DB::commit();
-
-    //     return redirect()->route('orders.index')->with('success', 'Order created successfully!');
-    // } catch (\Exception $e) {
-    //     DB::rollBack();
-        return back()->with('error', 'Failed to create order: ' . $e->getMessage())->withInput();
-    // }
-}
 
 
 
