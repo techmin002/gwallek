@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\OrderManager\Models\Order;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,8 +18,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
-    }
+
+public function boot()
+{
+    view()->composer('*', function ($view) {
+        $pendingCount = Order::where('status', 'pending')->count();
+        $view->with('pendingCount', $pendingCount);
+    });
+}
+
 }

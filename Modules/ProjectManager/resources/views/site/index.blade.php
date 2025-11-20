@@ -89,10 +89,9 @@
                                                         class="btn btn-info btn-sm">
                                                         View Details
                                                     </a>
-                                                    <a href="{{ route('paymentdetails.index', $site->id) }}"
-                                                        class="btn btn-sm btn-info  m-1" title="Project Info">Payment
-                                                        Details
-                                                    </a>
+<a href="{{ route('sites.payment-details', $site->id) }}" class="btn btn-sm btn-info m-1" title="Project Info">
+    Payment Details
+</a>
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="{{ route('sites.images', $site->id) }}"

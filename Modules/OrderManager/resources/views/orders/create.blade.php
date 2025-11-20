@@ -10,6 +10,11 @@
 @endsection
 
 @section('content')
+@php
+    // check role (adjust field name based on your user table)
+    $isPurchaseTeam = ($userRole === 'purchase');
+@endphp
+
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -43,10 +48,9 @@
                             </div>
                         </div>
 
-                        <!-- ✅ Combined Products + Multiple Images Section -->
                         <h3 class="mt-5 mb-3 text-primary border-bottom pb-2 section-title">
                             <i class="bi bi-bag-check me-2"></i>
-                            Products & Images
+                            Products {{ $isPurchaseTeam ? '& Images' : '' }}
                         </h3>
 
                         <div class="container-fluid">
@@ -70,7 +74,6 @@
         </div>
     </section>
 </div>
-
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -147,95 +150,85 @@
         border-radius: 0.5rem;
     }
 </style>
-
 <script>
-let productIndex = 0;
+    const isPurchaseTeam = @json($isPurchaseTeam);
+    let productIndex = 0;
 
-// ✅ Create product block with multiple images section
-function createProductRow(index) {
-    return `
-    <div class="item-row product-block mb-4 p-3 border rounded">
-        <div class="row gy-3 align-items-center">
-            <div class="col-md-3">
-                <input type="text" name="products[${index}][product_name]" class="form-control border-primary shadow-sm" placeholder="Product Name" required>
+    function createProductRow(index) {
+        return `
+        <div class="item-row product-block mb-4 p-3 border rounded">
+            <div class="row gy-3 align-items-center">
+                <div class="col-md-3">
+                    <input type="text" name="products[${index}][product_name]" class="form-control border-primary shadow-sm" placeholder="Product Name" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="products[${index}][quantity]" class="form-control border-primary shadow-sm quantity-input" min="1" value="1" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" name="products[${index}][unit]" class="form-control border-primary shadow-sm" placeholder="Unit" required>
+                </div>
+
+                ${isPurchaseTeam ? `
+                <div class="col-md-2 text-center">
+                    <button type="button" class="btn btn-sm btn-outline-success add-image-row" data-index="${index}">
+                        <i class="bi bi-plus-circle"></i> Add Image
+                    </button>
+                </div>` : ''}
+
+                <div class="col-md-2 text-center">
+                    <button type="button" class="btn btn-danger remove-product-row" title="Remove Product">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
 
+            ${isPurchaseTeam ? `<div class="image-price-container mt-3" data-product-index="${index}"></div>` : ''}
+        </div>`;
+    }
+
+    function createImageRow(productIndex, imageIndex) {
+        return `
+        <div class="row gy-3 align-items-center image-row mb-2">
+            <div class="col-md-4">
+                <input type="file" name="products[${productIndex}][images][${imageIndex}][file]" class="form-control border-primary shadow-sm" accept="image/*" required>
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="products[${productIndex}][images][${imageIndex}][title]" class="form-control border-primary shadow-sm" placeholder="Image Title" required>
+            </div>
             <div class="col-md-2">
-                <input type="number" name="products[${index}][quantity]" class="form-control border-primary shadow-sm quantity-input" min="1" value="1" required>
+                <input type="number" step="0.01" name="products[${productIndex}][images][${imageIndex}][price]" class="form-control border-primary shadow-sm" placeholder="Price" required>
             </div>
-
-            <div class="col-md-2">
-                <input type="text" name="products[${index}][unit]" class="form-control border-primary shadow-sm" placeholder="Unit" required>
-            </div>
-
             <div class="col-md-2 text-center">
-                <button type="button" class="btn btn-sm btn-outline-success add-image-row" data-index="${index}">
-                    <i class="bi bi-plus-circle"></i> Add Image
+                <button type="button" class="btn btn-outline-danger remove-image-row">
+                    <i class="bi bi-x-circle"></i>
                 </button>
             </div>
+        </div>`;
+    }
 
-            <div class="col-md-2 text-center">
-                <button type="button" class="btn btn-danger remove-product-row" title="Remove Product">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>
+    $(function() {
+        const container = $("#productContainer");
 
-        <!-- Container for multiple image+price pairs -->
-        <div class="image-price-container mt-3" data-product-index="${index}"></div>
-    </div>`;
-}
+        $("#addProductRow").on("click", function() {
+            container.append(createProductRow(productIndex++));
+        });
 
-// ✅ Create image + price input row
-// ✅ Create image + price + title input row
-function createImageRow(productIndex, imageIndex) {
-    return `
-    <div class="row gy-3 align-items-center image-row mb-2">
-        <div class="col-md-4">
-            <input type="file" name="products[${productIndex}][images][${imageIndex}][file]" class="form-control border-primary shadow-sm" accept="image/*" required>
-        </div>
-        <div class="col-md-4">
-            <input type="text" name="products[${productIndex}][images][${imageIndex}][title]" class="form-control border-primary shadow-sm" placeholder="Image Title" required>
-        </div>
-        <div class="col-md-2">
-            <input type="number" step="0.01" name="products[${productIndex}][images][${imageIndex}][price]" class="form-control border-primary shadow-sm" placeholder="Price" required>
-        </div>
-        <div class="col-md-2 text-center">
-            <button type="button" class="btn btn-outline-danger remove-image-row">
-                <i class="bi bi-x-circle"></i>
-            </button>
-        </div>
-    </div>`;
-}
+        $(document).on("click", ".remove-product-row", function() {
+            $(this).closest(".product-block").remove();
+        });
 
-$(function() {
-    const container = $("#productContainer");
+        $(document).on("click", ".add-image-row", function() {
+            const productIndex = $(this).data("index");
+            const imageContainer = $(`.image-price-container[data-product-index="${productIndex}"]`);
+            const imageIndex = imageContainer.find(".image-row").length;
+            imageContainer.append(createImageRow(productIndex, imageIndex));
+        });
 
-    // Add new product
-    $("#addProductRow").on("click", function() {
-        container.append(createProductRow(productIndex++));
+        $(document).on("click", ".remove-image-row", function() {
+            $(this).closest(".image-row").remove();
+        });
+
+        $("#addProductRow").trigger("click");
     });
-
-    // Remove product
-    $(document).on("click", ".remove-product-row", function() {
-        $(this).closest(".product-block").remove();
-    });
-
-    // Add image row inside specific product
-    $(document).on("click", ".add-image-row", function() {
-        const productIndex = $(this).data("index");
-        const imageContainer = $(`.image-price-container[data-product-index="${productIndex}"]`);
-        const imageIndex = imageContainer.find(".image-row").length;
-        imageContainer.append(createImageRow(productIndex, imageIndex));
-    });
-
-    // Remove specific image row
-    $(document).on("click", ".remove-image-row", function() {
-        $(this).closest(".image-row").remove();
-    });
-
-    // Add one product row by default
-    $("#addProductRow").trigger("click");
-});
 </script>
 @endsection

@@ -9,8 +9,12 @@ use Modules\Branch\Entities\Branch;
 use Modules\Finance\Models\CashCounter;
 use Modules\ProjectManager\Models\Customer;
 use Modules\ProjectManager\Models\Site;
-use Modules\ProjectManager\Models\SitePayment;
-use Modules\ProjectManager\Models\SitePaymentDetails;
+use Modules\ProjectManager\Models\Income;
+use Modules\OrderManager\Models\PurchaseItem;
+use Modules\OrderManager\Models\PaymentItem;
+use Modules\OrderManager\Models\Order;
+use Modules\OrderManager\Models\OrderItem;
+
 
 class SiteController extends Controller
 {
@@ -55,123 +59,105 @@ class SiteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        // dd($request->all());
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'branch_id' => 'required|exists:branches,id',
-            'assign_to' => 'required|exists:users,id',
-            'customer_id' => 'required|exists:customers,id',
-            'contract_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'amount' => 'required|numeric',
+        'start_date' => 'required|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
+        'branch_id' => 'required|exists:branches,id',
+        'assign_to' => 'required|exists:users,id',
+        'customer_id' => 'required|exists:customers,id',
+        'contract_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
 
-            'payment_method' => 'nullable|string|in:cash,online,check',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'check_number' => 'nullable|string',
-            'online_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
-        ]);
+        // Payment fields
+        'payment_method' => 'nullable|string|in:cash,online,check',
+        'paid_amount' => 'nullable|numeric|min:0',
+        'check_number' => 'nullable|string',
+        'online_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
+    ]);
 
-        // ✅ Create Site
-        $site = new Site();
-        $site->name = $request->name;
-        $site->amount = $request->amount;
-        $site->start_date = $request->start_date;
-        $site->end_date = $request->end_date;
-        $site->branch_id = $request->branch_id;
-        $site->assign_to = $request->assign_to;
-        $site->customer_id = $request->customer_id;
-        $site->description = $request->description;
-        $site->status = $request->status;
-        $site->location = $request->location;
-        $site->progress_status = $request->progress_status;
-        $site->project_area = $request->project_area;
-        $site->contract_id = $request->contract_id;
-        $site->overview = $request->overview;
-        $site->key_features = $request->key_features;
-        $site->technical_specifications = $request->technical_specifications;
-        $site->environmental_impact = $request->environmental_impact;
+    // ✅ Create Site
+    $site = new Site();
+    $site->name = $request->name;
+    $site->amount = $request->amount;
+    $site->start_date = $request->start_date;
+    $site->end_date = $request->end_date;
+    $site->branch_id = $request->branch_id;
+    $site->assign_to = $request->assign_to;
+    $site->customer_id = $request->customer_id;
+    $site->description = $request->description;
+    $site->status = $request->status;
+    $site->location = $request->location;
+    $site->progress_status = $request->progress_status;
+    $site->project_area = $request->project_area;
+    $site->contract_id = $request->contract_id;
+    $site->overview = $request->overview;
+    $site->key_features = $request->key_features;
+    $site->technical_specifications = $request->technical_specifications;
+    $site->environmental_impact = $request->environmental_impact;
 
-        // ✅ Upload site image
-        if ($request->hasFile('image')) {
-            $imageName = time() . '_' . $request->image->getClientOriginalName();
-            $request->image->move(public_path('upload/sites/'), $imageName);
-            $site->image = $imageName;
-        }
-
-        // ✅ Upload contract image (required)
-        if ($request->hasFile('contract_image')) {
-            $contractName = time() . '_' . $request->contract_image->getClientOriginalName();
-            $request->contract_image->move(public_path('upload/sites/contracts/'), $contractName);
-            $site->contract_image = $contractName;
-        }
-
-        $site->save();
-
-        // ✅ Handle Online Image Upload
-        $onlineImagePath = null;
-        if ($request->hasFile('online_image')) {
-            $onlineImage = $request->file('online_image');
-            $onlineImagePath = time() . '.' . $onlineImage->getClientOriginalExtension();
-            $onlineImage->move(public_path('upload/images/Payment'), $onlineImagePath);
-        }
-
-        // ✅ Payment calculations
-        $totalAmount = $request->amount ?? 0;
-        $paidAmount = $request->paid_amount ?? 0;
-        $dueAmount  = $totalAmount - $paidAmount;
-
-        // ✅ Create Payment record
-        $payment = SitePayment::create([
-            'site_id' => $site->id,
-            'amount' => $totalAmount,
-            'paid_amount' => $paidAmount,
-            'due_amount' => $dueAmount,
-            'payment_method' => $request->payment_method,
-            'check_number' => $request->check_number,
-            'online_image' => $onlineImagePath,
-        ]);
-
-        // ✅ Store Payment Details
-        SitePaymentDetails::create([
-            'site_id' => $site->id,
-            'payment_id' => $payment->id,
-            'amount' => $paidAmount,
-            'payment_method' => $request->payment_method,
-            'check_number' => $request->check_number,
-            'online_image' => $onlineImagePath,
-            'date' => now(), // Or $request->date if user selects
-        ]);
-
-        // ✅ Branch-wise Cash Counter Update
-        if ($request->payment_method === 'cash' && $paidAmount > 0) {
-            $branchId = $site->branch_id;
-
-            $cashCounter = CashCounter::where('branch_id', $branchId)->first();
-
-            if ($cashCounter) {
-                $cashCounter->opening_amount = ($cashCounter->opening_amount ?? 0) + $paidAmount;
-                $cashCounter->due_amount     = ($cashCounter->due_amount ?? 0) + $paidAmount;
-                $cashCounter->save();
-            } else {
-                CashCounter::create([
-                    'branch_id'      => $branchId,
-                    'opening_amount' => $paidAmount,
-                    'due_amount'     => $paidAmount,
-                ]);
-            }
-        }
-
-        return redirect()->back()->with('success', 'Site created successfully!');
+    // ✅ Upload site image
+    if ($request->hasFile('image')) {
+        $imageName = time() . '_' . $request->image->getClientOriginalName();
+        $request->image->move(public_path('upload/sites/'), $imageName);
+        $site->image = $imageName;
     }
 
+    // ✅ Upload contract image (required)
+    if ($request->hasFile('contract_image')) {
+        $contractName = time() . '_' . $request->contract_image->getClientOriginalName();
+        $request->contract_image->move(public_path('upload/sites/contracts/'), $contractName);
+        $site->contract_image = $contractName;
+    }
 
+    $site->save();
 
+    // ✅ Handle receipt image
+    $receiptImagePath = null;
+    if ($request->hasFile('online_image')) {
+        $receiptImage = $request->file('online_image');
+        $receiptImagePath = time() . '_' . $receiptImage->getClientOriginalName();
+        $receiptImage->move(public_path('uploads/receipts/'), $receiptImagePath);
+    }
 
+    // ✅ Save Paid Amount as Income
+    if ($request->paid_amount && $request->paid_amount > 0) {
+        Income::create([
+            'site_id' => $site->id,
+            'title' => 'Initial Payment by Customer', // you can change the title
+            'amount' => $request->paid_amount,
+            'received_date' => now(),
+            'payment_method' => $request->payment_method,
+            'note' => 'Paid during site creation',
+            'receipt_image' => $receiptImagePath,
+        ]);
+    }
+
+    // ✅ Update Branch Cash Counter if payment is cash
+    if ($request->payment_method === 'cash' && $request->paid_amount > 0) {
+        $branchId = $site->branch_id;
+
+        $cashCounter = CashCounter::where('branch_id', $branchId)->first();
+
+        if ($cashCounter) {
+            $cashCounter->opening_amount = ($cashCounter->opening_amount ?? 0) + $request->paid_amount;
+            $cashCounter->due_amount     = ($cashCounter->due_amount ?? 0) + $request->paid_amount;
+            $cashCounter->save();
+        } else {
+            CashCounter::create([
+                'branch_id' => $branchId,
+                'opening_amount' => $request->paid_amount,
+                'due_amount' => $request->paid_amount,
+            ]);
+        }
+    }
+
+    return redirect()->back()->with('success', 'Site created and initial income recorded successfully!');
+}
     /**
      * Show the specified resource.
      */
@@ -179,6 +165,66 @@ class SiteController extends Controller
     {
         return view('projectmanager::show');
     }
+
+    public function paymentShow($siteId)
+{
+    // Get the site with basic data
+    $site = Site::with(['incomes'])->findOrFail($siteId);
+
+    // Calculate total cost from sites table (project amount)
+    $totalCost = $site->amount ?? 0;
+
+    // Calculate total income from incomes table for this site
+    $totalIncome = $site->incomes->sum('amount');
+
+    // Calculate total purchase cost from purchase_items
+    $totalPurchaseCost = 0;
+    
+    try {
+        // Try the first approach
+        $totalPurchaseCost = PurchaseItem::whereHas('orderItem.order', function($query) use ($siteId) {
+            $query->where('project_id', $siteId);
+        })->sum('total_price');
+    } catch (\Exception $e) {
+        // If that fails, use alternative approach
+        $orderIds = Order::where('project_id', $siteId)->pluck('id');
+        if ($orderIds->count() > 0) {
+            $orderItemIds = OrderItem::whereIn('order_id', $orderIds)->pluck('id');
+            if ($orderItemIds->count() > 0) {
+                $totalPurchaseCost = PurchaseItem::whereIn('order_item_id', $orderItemIds)->sum('total_price');
+            }
+        }
+    }
+
+    // Calculate total payments from payment_items
+    $totalPayments = 0;
+    
+    try {
+        $totalPayments = PaymentItem::whereHas('purchaseItem.orderItem.order', function($query) use ($siteId) {
+            $query->where('project_id', $siteId);
+        })->sum('paid_amount');
+    } catch (\Exception $e) {
+        // Alternative approach for payments
+        $orderIds = Order::where('project_id', $siteId)->pluck('id');
+        if ($orderIds->count() > 0) {
+            $orderItemIds = OrderItem::whereIn('order_id', $orderIds)->pluck('id');
+            if ($orderItemIds->count() > 0) {
+                $purchaseItemIds = PurchaseItem::whereIn('order_item_id', $orderItemIds)->pluck('id');
+                if ($purchaseItemIds->count() > 0) {
+                    $totalPayments = PaymentItem::whereIn('purchase_item_id', $purchaseItemIds)->sum('paid_amount');
+                }
+            }
+        }
+    }
+
+    return view('projectmanager::site.payment_details', compact(
+        'site',
+        'totalCost',
+        'totalIncome',
+        'totalPurchaseCost',
+        'totalPayments'
+    ));
+}
 
     /**
      * Show the form for editing the specified resource.

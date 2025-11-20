@@ -1,8 +1,10 @@
 <?php
+// FILE: 2025_06_10_143150_create_device_purchases_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateDevicePurchasesTable extends Migration
 {
@@ -24,6 +26,9 @@ class CreateDevicePurchasesTable extends Migration
 
     public function down()
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Schema::dropIfExists('device_purchases');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }
+

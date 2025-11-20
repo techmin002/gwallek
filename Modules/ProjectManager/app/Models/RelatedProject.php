@@ -25,8 +25,4 @@ class RelatedProject extends Model
     {
         return $this->belongsTo(Site::class);
     }
-    // protected static function newFactory(): RelatedProjectFactory
-    // {
-    //     // return RelatedProjectFactory::new();
-    // }
 }

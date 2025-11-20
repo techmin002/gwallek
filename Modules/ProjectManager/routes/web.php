@@ -7,6 +7,7 @@ use Modules\ProjectManager\Http\Controllers\PaymentDetailsController;
 use Modules\ProjectManager\Http\Controllers\ProjectManagerController;
 use Modules\ProjectManager\Http\Controllers\RelatedProjectController;
 use Modules\ProjectManager\Http\Controllers\SiteController;
+use Modules\ProjectManager\Http\Controllers\IncomeController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projectmanagers', ProjectManagerController::class)->names('projectmanager');
@@ -46,4 +47,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('projects/payment-details/store', [PaymentDetailsController::class, 'store'])
         ->name('paymentdetails.store');
+
+    // Income Routes
+    Route::resource('/incomes', IncomeController::class);
+    Route::get('/sites/{site}/payment-details', [SiteController::class, 'paymentShow'])
+    ->name('sites.payment-details');
+
 });

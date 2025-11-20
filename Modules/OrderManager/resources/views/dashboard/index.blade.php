@@ -7,9 +7,11 @@
         <li class="breadcrumb-item active">Orders Dashboard</li>
     </ol>
 @endsection
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 @section('content')
     <style>
+
         .card {
             border-radius: 15px;
             border: none;
@@ -84,7 +86,7 @@
                             <i class="fas fa-truck fa-2x ms-5"></i>
                         </div>
 
-                        <a href="{{ route('orders.dispatched') }}" class="card-footer-link">
+                        <a href="#" class="card-footer-link">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -102,7 +104,7 @@
                             <i class="fas fa-times-circle fa-2x ms-5"></i>
                         </div>
 
-                        <a href="{{ route('orders.rejected') }}" class="card-footer-link">
+                        <a href="#" class="card-footer-link">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -120,7 +122,7 @@
                             <i class="fas fa-check-circle fa-2x ms-5"></i>
                         </div>
 
-                        <a href="{{ route('orders.completed') }}" class="card-footer-link">
+                        <a href="#" class="card-footer-link">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -162,15 +164,20 @@
                                     <td>
                                         {{ $order->created_at ? $order->created_at->format('d M, Y H:i') : 'N/A' }}
                                     </td>
-                                    <td>
-                                        <button
-                                            class="btn btn-sm
-        @if ($order->status == 'completed') btn-success
-        @elseif($order->status == 'reject') btn-danger
-        @else btn-warning @endif">
-                                            {{ ucfirst($order->status ?? 'Pending') }}
-                                        </button>
-                                    </td>
+ <td>
+    <span
+        class="badge
+            @if ($order->status === 'approved') bg-success
+            @elseif ($order->status === 'rejected') bg-danger
+            @elseif ($order->status === 'pending') bg-warning
+            @else bg-secondary
+            @endif">
+        {{ ucfirst($order->status ?? 'pending') }}
+    </span>
+</td>
+
+
+
                                 </tr>
                             @endforeach
                         </tbody>

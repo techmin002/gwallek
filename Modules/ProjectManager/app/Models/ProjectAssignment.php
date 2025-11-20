@@ -42,10 +42,4 @@ class ProjectAssignment extends Model
     {
         return $this->belongsTo(User::class, 'staff_id');
     }
-
-
-    // protected static function newFactory(): ProjectAssignmentFactory
-    // {
-    //     // return ProjectAssignmentFactory::new();
-    // }
 }

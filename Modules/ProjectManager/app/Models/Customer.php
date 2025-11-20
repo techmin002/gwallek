@@ -33,8 +33,4 @@ class Customer extends Model
     {
         return $this->hasMany(Site::class, 'customer_id');
     }
-    // protected static function newFactory(): CustomerFactory
-    // {
-    //     // return CustomerFactory::new();
-    // }
 }

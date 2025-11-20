@@ -2,58 +2,33 @@
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
-use Modules\OrderManager\Http\Controllers\OrderManagerController;
-use Modules\OrderManager\Http\Controllers\PurcheshController;
-use Modules\Product\Models\Product;
-use Modules\ProjectManager\Models\Site;
+use Modules\OrderManager\Http\Controllers\OrderController;
+use Modules\OrderManager\Http\Controllers\PurchaseController;
+use Modules\OrderManager\Http\Controllers\PaymentController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('ordermanagers', OrderManagerController::class)->names('ordermanager');
-    Route::resource('orders', OrderManagerController::class)->names('orders');
-
-    // Route::get('/ajax/projects', [OrderManagerController::class, 'ajaxProjects'])->name('ajax.projects');
-    // Route::get('/ajax/products', [OrderManagerController::class, 'ajaxProducts'])->name('ajax.products');
-
-    // AJAX routes directly in web.php
-    Route::get('ajax/projects', function (Request $request) {
-        $search = $request->search ?? '';
-        $projects = Site::where('name', 'like', "%{$search}%")->get();
-        return response()->json([
-            'results' => $projects->map(fn($p) => ['id' => $p->id, 'text' => $p->name])
-        ]);
-    })->name('ajax.projects');
-
-    Route::get('ajax/products', function (Request $request) {
-        $search = $request->search ?? '';
-        $products = Product::with('unit')
-            ->where('name', 'like', "%{$search}%")
-            ->get();
-
-        return response()->json([
-            'results' => $products->map(fn($p) => [
-                'id' => $p->id,
-                'text' => $p->name,
-                'price' => $p->price,
-                'unit' => $p->unit?->name ?? 'N/A'
-            ])
-        ]);
-    })->name('ajax.products');
-
-    Route::put('/history/store/{id}', [OrderManagerController::class, 'history'])->name('orderhistory.store');
-    Route::get('/history/{id}', [OrderManagerController::class, 'historydetails'])->name('order.history');
-
-    Route::get('dispatched', [PurcheshController::class, 'dispatched'])->name('orders.dispatched');
-    Route::get('tracking', [PurcheshController::class, 'tracking'])->name('orders.tracking');
-    Route::post('/orders/tracking/search', [PurcheshController::class, 'trackingSearch'])->name('orders.tracking.search');
-    Route::get('rejected', [PurcheshController::class, 'rejected'])->name('orders.rejected');
-    Route::get('completed', [PurcheshController::class, 'completed'])->name('orders.completed');
-    Route::get('return', [PurcheshController::class, 'return'])->name('orders.return');
-    Route::post('return/store', [PurcheshController::class, 'returnstore'])->name('returns.store');
-    Route::get('returns/{id}', [PurcheshController::class, 'returndetails'])->name('returns.details');
-    Route::get('returns/destroy/{id}', [PurcheshController::class, 'returndestroy'])->name('returns.destroy');
-    Route::put('returns/update/{id}', [PurcheshController::class, 'returnupdate'])->name('returns.update');
-
-    Route::get('dashboard', [PurcheshController::class, 'dashboard'])->name('dashboard.index');
-
-
+    Route::resource('orders', OrderController::class);
+    Route::resource('purchases', PurchaseController::class);
+    Route::resource('payments', PaymentController::class);
+    Route::get('/dashboard', [OrderController::class, 'dashboard'])->name('orders.dashboard');
+    Route::put('/orders/{order}/items/{item}/status', [OrderController::class, 'updateItemStatus'])
+        ->name('orders.items.status');
+    Route::get('/approvedorders', [OrderController::class, 'index2'])
+        ->name('orderss.index');
+    Route::get('/showorders/{order}', [OrderController::class, 'show2'])
+        ->name('orderss.show');
 });
+
+// Project Payment Routes
+Route::get('/project/select-project', [PaymentController::class, 'selectProject'])->name('payments.select-project');
+Route::post('/payments/project-items', [PaymentController::class, 'showProjectItems'])->name('payments.project-items');
+// Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
+// Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+Route::get('/success', [PaymentController::class, 'success'])->name('payments.success');
+Route::get('/payments/project/{projectId}', [PaymentController::class, 'projectPayments'])->name('payments.project-payments');
+Route::get('/payments/summary', [PaymentController::class, 'getPaymentSummary'])->name('payments.summary');
+
+// Bill generation routes
+Route::post('/payments/{payment}/generate-bill', [PaymentController::class, 'generateBill'])->name('payments.generate-bill');
+Route::get('/payments/bill/{invoice}/download', [PaymentController::class, 'downloadBill'])->name('payments.download-bill');
+Route::get('/payments/history', [PaymentController::class, 'paymentHistory'])->name('payments.history');

@@ -52,7 +52,6 @@
                                             @if (auth()->user()->access_type == 'Super Admin')
                                                 <th>Branch</th>
                                             @endif
-                                            <th>Images</th>kalhi
                                             <th>Date </th>
                                             <th>Status</th>
                                         </tr>
@@ -71,27 +70,33 @@
                                                 @if (auth()->user()->access_type == 'Super Admin')
                                                     <td>{{ $order->project->branch->name ?? 'N/A' }}</td>
                                                 @endif
-                                                <td class="text-center">
-                                                    @if ($order->image)
-                                                        <img src="{{ asset('upload/order_images/' . $order->image) }}"
-                                                            width="50">
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
+                                                
 
                                                 <td>
                                                     {{ $order->created_at ? $order->created_at->format('d M, Y H:i') : 'N/A' }}
                                                 </td>
                                                 <td>
-                                                    <button
-                                                        class="btn btn-sm
-                                                             @if ($order->status == 'completed') btn-success
-                                                             @elseif($order->status == 'reject') btn-danger
-                                                             @else btn-warning @endif">
-                                                        {{ ucfirst($order->status ?? 'Pending') }}
-                                                    </button>
-                                                </td>
+    @php
+        $statusLabel = $order->status;
+        $statusClass = 'btn-secondary';
+
+        if ($order->status == 'pending') {
+            $statusLabel = 'pending';
+            $statusClass = 'btn-warning';
+        } elseif ($order->status == 'approved') {
+            $statusLabel = 'approved';
+            $statusClass = 'btn-success';
+        } elseif ($order->status == 'rejected') {
+            $statusLabel = 'Rejected';
+            $statusClass = 'btn-danger';
+        }
+    @endphp
+
+    <span class="btn btn-sm {{ $statusClass }}">
+        {{ $statusLabel }}
+    </span>
+</td>
+
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -103,7 +108,6 @@
                                             @if (auth()->user()->access_type == 'Super Admin')
                                                 <th>Branch</th>
                                             @endif
-                                            <th>Images</th>
                                             <th>Date</th>
                                             <th>Status</th>
                                         </tr>

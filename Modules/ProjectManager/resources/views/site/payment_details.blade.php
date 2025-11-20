@@ -16,203 +16,214 @@
         <section class="content">
             <div class="container-fluid">
 
-                <!-- Top Cards: Paid & Due Amount -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="card bg-info text-white">
-                            <div class="card-body">
-                                <h4>Total Amount: {{ $totalAmount }}</h4>
+               @include("projectmanager::site.financesummary")
+
+                <!-- Income History Section (Since you don't have paymentDetails) -->
+                <div class="row">
+                    <div class="col-12">
+                        <!-- Add Income Button -->
+                        <div class="mb-3">
+    <a href="" class="btn btn-info" data-toggle="modal" data-target="#payAmountModal">
+        <i class="fa fa-plus"></i> Add Income
+    </a>
+</div>
+
+                        <!-- Income History Table -->
+                        <div class="card mt-3">
+                            <div class="card-body table-responsive">
+                                <table class="table table-bordered table-striped text-center align-middle">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>S.R</th>
+                                            <th>Title</th>
+                                            <th>Amount</th>
+                                            <th>Payment Method</th>
+                                            <th>Receipt</th>
+                                            <th>Date</th>
+                                            <th>Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $incomes = $site->incomes ?? collect();
+                                        @endphp
+                                        
+                                        @forelse($incomes as $income)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $income->title }}</td>
+                                                <td>{{ number_format($income->amount, 2) }}</td>
+                                                <td>{{ ucfirst($income->payment_method) }}</td>
+                                                <td>
+                                                    @if($income->receipt_image)
+                                                        <a href="{{ asset('uploads/receipts/' . $income->receipt_image) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            View Receipt
+                                                        </a>
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>{{ $income->received_date }}</td>
+                                                <td>{{ $income->note ?? '-' }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center">No income records found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url()->previous() }}" class="btn btn-secondary">
+                                    Back
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <h4>Total Paid Amount: {{ $totalPaid }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-danger text-white">
-                            <div class="card-body">
-                                <h4>Total Due Amount: {{ $totalDue }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pay Amount Button -->
-                <div class="mb-3">
-                    <a href="" class="btn btn-info" data-toggle="modal" data-target="#payAmountModal">
-                        <i class="fa fa-plus"></i> Pay Amount
-                    </a>
-                    <div class="modal fade " id="payAmountModal" tabindex="-1" role="dialog"
-                        aria-labelledby="payAmountModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <form action="{{ route('paymentdetails.store') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <input type="hidden" name="site_id" value="{{ $site->id }}">
-                                <div class="modal-content">
-                                    <div class="modal-header bg-info">
-                                        <h4 class="modal-title">Pay Amount</h4>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            {{-- Paid Amount --}}
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="paid_amount">Paid Amount</label>
-                                                    <input type="number" name="paid_amount" id="paid_amount"
-                                                        class="form-control" value="{{ old('paid_amount') }}"
-                                                        max="{{ $totalDue }}">
-                                                    <small class="text-muted">Maximum payable: {{ $totalDue }}</small>
-                                                    @error('paid_amount')
-                                                        <p style="color:red; margin-top:5px;">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            {{-- Payment Method --}}
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="payment_method">Payment Method</label>
-                                                    <select name="payment_method" id="payment_method" class="form-control">
-                                                        <option value="">Select Payment Method</option>
-                                                        <option value="cash"
-                                                            {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash
-                                                        </option>
-                                                        <option value="check"
-                                                            {{ old('payment_method') == 'check' ? 'selected' : '' }}>Cheque
-                                                        </option>
-                                                        <option value="online"
-                                                            {{ old('payment_method') == 'online' ? 'selected' : '' }}>
-                                                            Online</option>
-                                                    </select>
-                                                    @error('payment_method')
-                                                        <p style="color:red; margin-top:5px;">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            {{-- Payment Date --}}
-                                            <div class="col-md-6 mb-3">
-                                                <label for="date" class="form-label">Payment Date</label>
-                                                <input type="date" name="date" class="form-control"
-                                                    value="{{ old('date', date('Y-m-d')) }}" required>
-                                                @error('date')
-                                                    <p style="color:red; margin-top:5px;">{{ $message }}</p>
-                                                @enderror
-                                            </div>
-
-                                            {{-- Check Number --}}
-                                            <div class="col-md-6" id="check_number_div" style="display:none;">
-                                                <div class="form-group">
-                                                    <label for="check_number">Cheque Number</label>
-                                                    <input type="text" name="check_number" class="form-control"
-                                                        value="{{ old('check_number') }}">
-                                                    @error('check_number')
-                                                        <p style="color:red; margin-top:5px;">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            {{-- Online Payment Image --}}
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="online_image">Upload Receipt</label>
-                                                    <input type="file" name="online_image" class="form-control-file"
-                                                        required accept="image/*">
-                                                    @error('online_image')
-                                                        <p style="color:red; margin-top:5px;">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-success">Pay</button>
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    </div>
-
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Details Table -->
-                <div class="card mt-3">
-                    <div class="card-body table-responsive">
-                        <table class="table table-bordered table-striped text-center align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>S.R</th>
-                                    <th>Paid Amount</th>
-                                    <th>Payment Method</th>
-                                    <th>Cheque Number</th>
-                                    <th>Online Receipt</th>
-                                    <th>Payment Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($site->paymentDetails as $detail)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $detail->amount }}</td>
-                                        <td>{{ ucfirst($detail->payment_method) }}</td>
-                                        <td>{{ $detail->check_number ?? '-' }}</td>
-                                        <td>
-                                            {{-- <img src="{{ asset('upload/images/Payment/' . $detail->online_image) }}"
-                                                    width="80"> --}}
-                                            <a href="{{ asset('upload/images/Payment/' . $detail->online_image) }}"
-                                                target="_blank" alt="">View Receipt</a>
-                                        </td>
-                                        <td>{{ $detail->date }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6">No payment details found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer">
-                        <a href="{{ url()->previous() }}" class="btn btn-secondary">
-                            Back
-                        </a>
-                    </div>
-
                 </div>
 
             </div>
         </section>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const paymentSelect = document.getElementById('payment_method');
-            const checkDiv = document.getElementById('check_number_div');
 
-            // Initial check on page load (if old value exists)
-            const oldPayment = paymentSelect.value;
-            checkDiv.style.display = oldPayment === 'check' ? 'block' : 'none';
+    <!-- Pay Amount Modal -->
+   <!-- Pay Amount Modal -->
+<div class="modal fade" id="payAmountModal" tabindex="-1" role="dialog" aria-labelledby="payAmountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form action="{{ route('incomes.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header bg-info">
+                    <h4 class="modal-title">Add Income</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-            // On change
-            paymentSelect.addEventListener('change', function() {
-                if (this.value === 'check') {
-                    checkDiv.style.display = 'block';
-                    onlineDiv.style.display = 'none';
-                } else {
-                    checkDiv.style.display = 'none';
-                    onlineDiv.style.display = 'none';
-                }
-            });
-        });
-    </script>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Project (Hidden since we're on specific project page) -->
+                        <input type="hidden" name="site_id" value="{{ $site->id }}">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Project <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light" value="{{ $site->name }}" readonly>
+                            <small class="text-muted">This income will be recorded for {{ $site->name }}</small>
+                        </div>
 
+                        <!-- Title -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control" placeholder="Enter income title" value="{{ old('title', 'Payment Received') }}" required>
+                            @error('title')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Amount <span class="text-danger">*</span></label>
+                            <input type="number" name="amount" class="form-control" placeholder="Enter amount" value="{{ old('amount') }}" step="0.01" min="0" required>
+                            @error('amount')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Date -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Received Date <span class="text-danger">*</span></label>
+                            <input type="date" name="received_date" class="form-control" value="{{ old('received_date', date('Y-m-d')) }}" required>
+                            @error('received_date')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Payment Method <span class="text-danger">*</span></label>
+                            <select name="payment_method" class="form-control" id="payment_method" required>
+                                <option value="">-- Select Payment Method --</option>
+                                <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="card" {{ old('payment_method') == 'card' ? 'selected' : '' }}>Card</option>
+                                <option value="e_wallet" {{ old('payment_method') == 'e_wallet' ? 'selected' : '' }}>E-Wallet (eSewa, Khalti)</option>
+                                <option value="cheque" {{ old('payment_method') == 'cheque' ? 'selected' : '' }}>Cheque</option>
+                                <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                <option value="other" {{ old('payment_method') == 'other' ? 'selected' : '' }}>Other</option>
+                            </select>
+                            @error('payment_method')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Cheque Number (Conditional) -->
+                        <div class="col-md-6 mb-3" id="cheque_number_div" style="display:none;">
+                            <label class="form-label">Cheque Number <span class="text-danger">*</span></label>
+                            <input type="text" name="cheque_number" class="form-control" placeholder="Enter cheque number" value="{{ old('cheque_number') }}">
+                            @error('cheque_number')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Receipt Image -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Receipt Image (optional)</label>
+                            <input type="file" name="receipt_image" class="form-control" accept="image/*">
+                            @error('receipt_image')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Note -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Note</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="Add any additional notes...">{{ old('note') }}</textarea>
+                            @error('note')
+                                <p style="color:red; margin-top:5px;">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-check"></i> Save Income
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethod = document.getElementById('payment_method');
+        const chequeNumberDiv = document.getElementById('cheque_number_div');
+
+        function togglePaymentFields() {
+            const method = paymentMethod.value;
+            
+            // Show cheque number field only for cheque payment
+            if (method === 'cheque') {
+                chequeNumberDiv.style.display = 'block';
+                // Make cheque number required
+                document.querySelector('[name="cheque_number"]').required = true;
+            } else {
+                chequeNumberDiv.style.display = 'none';
+                // Remove required attribute
+                document.querySelector('[name="cheque_number"]').required = false;
+            }
+        }
+
+        // Initial check
+        togglePaymentFields();
+
+        // On change event
+        paymentMethod.addEventListener('change', togglePaymentFields);
+    });
+</script>
 @endsection

@@ -64,26 +64,18 @@ class Site extends Model
     {
         return $this->hasMany(SiteImages::class);
     }
-    // protected static function newFactory(): SiteFactory
-    // {
-    //     // return SiteFactory::new();
-    // }
     public function relatedProjects()
     {
         return $this->hasMany(RelatedProject::class, 'site_id', 'id');
-    }
-
-    public function payment()
-    {
-        return $this->hasOne(SitePayment::class);
-    }
-    public function paymentDetails()
-    {
-        return $this->hasMany(SitePaymentDetails::class, 'site_id');
     }
 
     public function orders()
     {
         return $this->hasMany(\Modules\OrderManager\Models\Order::class, 'project_id');
     }
+    public function incomes()
+{
+    return $this->hasMany(Income::class);
+}
+
 }
